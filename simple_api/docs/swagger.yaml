@@ -46,7 +46,7 @@ paths:
             $ref: '#/definitions/handler.ErrorResponse'
       summary: Get all users
       tags:
-      - Users
+      - Get
     post:
       consumes:
       - application/json
@@ -75,7 +75,7 @@ paths:
             type: object
       summary: Add a new user
       tags:
-      - Users
+      - Post
   /api/v1/users/{id}:
     delete:
       consumes:
@@ -110,7 +110,29 @@ paths:
             $ref: '#/definitions/handler.ErrorResponse'
       summary: Delete user by ID
       tags:
-      - Users
+      - Delete
+    get:
+      description: Get details of a user by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.User'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Get user by ID
+      tags:
+      - Get
     put:
       description: Update details of a user
       parameters:
@@ -140,7 +162,7 @@ paths:
             $ref: '#/definitions/handler.ErrorResponse'
       summary: Update user information
       tags:
-      - Users
+      - Put
   /health:
     get:
       consumes:
@@ -164,27 +186,4 @@ paths:
       summary: Check server health
       tags:
       - Health
-  /users/{id}:
-    get:
-      description: Get details of a user by ID
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/handler.User'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/handler.ErrorResponse'
-      summary: Get user by ID
-      tags:
-      - Users
 swagger: "2.0"

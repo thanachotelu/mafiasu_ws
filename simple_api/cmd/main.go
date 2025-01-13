@@ -34,7 +34,8 @@ func main() {
 		api.DELETE("/users/:id", handler.DeleteUserHandler(db))
 		api.POST("/users", handler.AddUserHandler(db))
 		api.GET("/users", handler.GetAllUsersHandler(db))
-	}
+		api.GET("/users/:id", handler.GetUserByID(db))
+	}	
 
 	// Start server
 	if err := r.Run(":8080"); err != nil {

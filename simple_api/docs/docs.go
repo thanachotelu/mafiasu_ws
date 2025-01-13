@@ -22,7 +22,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Users"
+                    "Get"
                 ],
                 "summary": "Get all users",
                 "responses": {
@@ -52,7 +52,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Users"
+                    "Post"
                 ],
                 "summary": "Add a new user",
                 "parameters": [
@@ -89,13 +89,46 @@ const docTemplate = `{
             }
         },
         "/api/v1/users/{id}": {
+            "get": {
+                "description": "Get details of a user by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Get"
+                ],
+                "summary": "Get user by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.User"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            },
             "put": {
                 "description": "Update details of a user",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Users"
+                    "Put"
                 ],
                 "summary": "Update user information",
                 "parameters": [
@@ -143,7 +176,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Users"
+                    "Delete"
                 ],
                 "summary": "Delete user by ID",
                 "parameters": [
@@ -216,41 +249,6 @@ const docTemplate = `{
                             "additionalProperties": {
                                 "type": "string"
                             }
-                        }
-                    }
-                }
-            }
-        },
-        "/users/{id}": {
-            "get": {
-                "description": "Get details of a user by ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Get user by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/handler.User"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
                         }
                     }
                 }

@@ -22,7 +22,7 @@ type ErrorResponse struct {
 
 // @Summary Get all users
 // @Description Get a list of all users
-// @Tags Users
+// @Tags Get
 // @Produce json
 // @Success 200 {array} User
 // @Failure 500 {object} ErrorResponse
@@ -43,21 +43,44 @@ func GetAllUsersHandler(db *sql.DB) gin.HandlerFunc {
 
 // @Summary Get user by ID
 // @Description Get details of a user by ID
-// @Tags Users
+// @Tags Get
 // @Produce  json
 // @Param   id   path      int     true  "User ID"
 // @Success 200  {object}  User
 // @Failure 404  {object}  ErrorResponse
-// @Router  /users/{id} [get]
-func GetUserByID(c *gin.Context) {
-	id := c.Param("id")
-	c.JSON(200, gin.H{"id": id, "name": "โอสธี สุขภูตานนท์"})
+// @Router  /api/v1/users/{id} [get]
+func GetUserByID(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		idstr := c.Param("id")
+		id, err := strconv.Atoi(idstr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "ID unseccessfully",
+			})
+			return
+
+		}
+		user, err := user.GetuserbyID(db, id)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": "cannot get user",
+			})
+			return
+		}
+		if user == nil {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "USER NOT FOUND",
+			})
+			return
+		}
+		c.JSON(http.StatusOK, user)
+	}
 }
 
 // DeleteUserHandler handles the delete user API
 // @Summary      Delete user by ID
 // @Description  Delete user from database
-// @Tags         Users
+// @Tags         Delete
 // @Accept       json
 // @Produce      json
 // @Param   id   path      int     true  "User ID"
@@ -90,7 +113,7 @@ func DeleteUserHandler(db *sql.DB) gin.HandlerFunc {
 
 // @Summary Update user information
 // @Description Update details of a user
-// @Tags Users
+// @Tags Put
 // @Produce  json
 // @Param        id    path      int           true  "User ID"
 // @Param        user  body      user.UserInput  true  "User Data"
@@ -133,7 +156,7 @@ func UpdateUserHandler(db *sql.DB) gin.HandlerFunc {
 // AddUserHandler handles the add user API
 // @Summary      Add a new user
 // @Description  Adds a new user to the database
-// @Tags         Users
+// @Tags         Post
 // @Accept       json
 // @Produce      json
 // @Param        user  body      user.UserInput  true  "User Data"

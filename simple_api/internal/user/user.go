@@ -134,3 +134,28 @@ func GetAllUsers(db *sql.DB) ([]User, error) {
 
 	return users, nil
 }
+
+func GetuserbyID(db *sql.DB , id int) ([]User, error) {
+	query := "SELECT id, name, email FROM users where id =$1"
+	
+	rows, err := db.Query(query, id)
+	
+
+	if err != nil {
+		log.Printf("Error querying users: %v", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []User
+	for rows.Next() {
+		var user User
+		if err := rows.Scan(&user.ID, &user.Name, &user.Email); err != nil {
+			log.Printf("Error scanning user: %v", err)
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	return users, nil
+}
