@@ -6,5 +6,4 @@
 *.backup
 *.backup.gz
 *.dump
-*.sql
 *.gz
