@@ -15,6 +15,7 @@ import (
 // @Tags         Health
 // @Accept       json
 // @Produce      json
+// @Security BearerAuth
 // @Success      200  {object}  map[string]string
 // @Failure      500  {object}  map[string]string
 // @Router       /health [get]

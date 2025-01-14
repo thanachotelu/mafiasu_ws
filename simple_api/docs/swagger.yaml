@@ -30,6 +30,8 @@ info:
 paths:
   /api/v1/users:
     get:
+      consumes:
+      - application/json
       description: Get a list of all users
       produces:
       - application/json
@@ -44,6 +46,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Get all users
       tags:
       - Get
@@ -73,6 +77,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Add a new user
       tags:
       - Post
@@ -108,10 +114,14 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Delete user by ID
       tags:
       - Delete
     get:
+      consumes:
+      - application/json
       description: Get details of a user by ID
       parameters:
       - description: User ID
@@ -130,6 +140,8 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Get user by ID
       tags:
       - Get
@@ -160,6 +172,8 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Update user information
       tags:
       - Put
@@ -183,7 +197,16 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Check server health
       tags:
       - Health
+security:
+- BearerAuth: []
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
