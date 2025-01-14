@@ -27,7 +27,9 @@ type SuccessResponse struct {
 // @Summary Get all users
 // @Description Get a list of all users
 // @Tags Get
+// @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Success 200 {array} User
 // @Failure 500 {object} ErrorResponse
 // @Router /api/v1/users [get]
@@ -48,7 +50,9 @@ func GetAllUsersHandler(db *sql.DB) gin.HandlerFunc {
 // @Summary Get user by ID
 // @Description Get details of a user by ID
 // @Tags Get
+// @Accept json
 // @Produce  json
+// @Security BearerAuth
 // @Param   id   path      int     true  "User ID"
 // @Success 200  {object}  User
 // @Failure 404  {object}  ErrorResponse
@@ -87,6 +91,7 @@ func GetUserByID(db *sql.DB) gin.HandlerFunc {
 // @Tags         Delete
 // @Accept       json
 // @Produce      json
+// @Security BearerAuth
 // @Param   id   path      int     true  "User ID"
 // @Success 200  {object}  SuccessResponse
 // @Failure 404  {object}  ErrorResponse
@@ -119,6 +124,7 @@ func DeleteUserHandler(db *sql.DB) gin.HandlerFunc {
 // @Description Update details of a user
 // @Tags Put
 // @Produce  json
+// @Security BearerAuth
 // @Param        id    path      int           true  "User ID"
 // @Param        user  body      user.UserInput  true  "User Data"
 // @Success 200  {object}  user.UserInput
@@ -163,6 +169,7 @@ func UpdateUserHandler(db *sql.DB) gin.HandlerFunc {
 // @Tags         Post
 // @Accept       json
 // @Produce      json
+// @Security BearerAuth
 // @Param        user  body      user.UserInput  true  "User Data"
 // @Success      200   {object}  user.UserInput
 // @Failure      404   {object}  ErrorResponse

@@ -26,6 +26,7 @@ type ErrorHealthResponse struct {
 // @Tags         Health
 // @Accept       json
 // @Produce      json
+// @Security BearerAuth
 // @Success      200  {object}  SuccessHealthResponse
 // @Failure      500  {object}  ErrorHealthResponse
 // @Router       /health [get]

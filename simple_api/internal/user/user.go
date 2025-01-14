@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	"users/internal/config"
 
 	_ "github.com/lib/pq" // PostgreSQL driver
 )
@@ -25,12 +24,12 @@ type UserInput struct {
 var db *sql.DB
 
 // InitDB initializes the database connection
-func InitDB(cfg config.Config) *sql.DB {
+func InitDB(host, port, user, password, dbname string) *sql.DB {
 	var err error
 
 	// PostgreSQL connection string (DSN)
 	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBName)
+		host, port, user, password, dbname)
 
 	// Open database connection
 	db, err = sql.Open("postgres", dsn)
