@@ -20,6 +20,10 @@ type ErrorResponse struct {
 	Message string `json:"message"`
 }
 
+type SuccessResponse struct {
+	Message string `json:"message"`
+}
+
 // @Summary Get all users
 // @Description Get a list of all users
 // @Tags Get
@@ -84,7 +88,7 @@ func GetUserByID(db *sql.DB) gin.HandlerFunc {
 // @Accept       json
 // @Produce      json
 // @Param   id   path      int     true  "User ID"
-// @Success 200  {object}  map[string]string
+// @Success 200  {object}  SuccessResponse
 // @Failure 404  {object}  ErrorResponse
 // @Failure 400  {object}  ErrorResponse
 // @Failure 500  {object}  ErrorResponse
@@ -117,7 +121,7 @@ func DeleteUserHandler(db *sql.DB) gin.HandlerFunc {
 // @Produce  json
 // @Param        id    path      int           true  "User ID"
 // @Param        user  body      user.UserInput  true  "User Data"
-// @Success 200  {object}  map[string]string
+// @Success 200  {object}  user.UserInput
 // @Failure 404  {object}  ErrorResponse
 // @Router  /api/v1/users/{id} [put]
 func UpdateUserHandler(db *sql.DB) gin.HandlerFunc {
@@ -160,8 +164,10 @@ func UpdateUserHandler(db *sql.DB) gin.HandlerFunc {
 // @Accept       json
 // @Produce      json
 // @Param        user  body      user.UserInput  true  "User Data"
-// @Success      200   {object}  map[string]string
-// @Failure      404   {object}  map[string]string
+// @Success      200   {object}  user.UserInput
+// @Failure      404   {object}  ErrorResponse
+// @Failure      409   {object}  ErrorResponse
+// @Failure      500   {object}  ErrorResponse
 // @Router       /api/v1/users [post]
 // AddUserHandler handles the add user API
 func AddUserHandler(db *sql.DB) gin.HandlerFunc {
@@ -171,7 +177,7 @@ func AddUserHandler(db *sql.DB) gin.HandlerFunc {
 		// Bind JSON input to the User struct
 		if err := c.ShouldBindJSON(&newUser); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "Invalid input format",
+				"message": "Invalid input format",
 			})
 			return
 		}
@@ -181,11 +187,11 @@ func AddUserHandler(db *sql.DB) gin.HandlerFunc {
 		if err != nil {
 			if err.Error() == "email already exists" {
 				c.JSON(http.StatusConflict, gin.H{
-					"error": "Email already exists",
+					"message": "Email already exists",
 				})
 			} else {
 				c.JSON(http.StatusInternalServerError, gin.H{
-					"error": "Failed to add user",
+					"message": "Failed to add user",
 				})
 			}
 			return

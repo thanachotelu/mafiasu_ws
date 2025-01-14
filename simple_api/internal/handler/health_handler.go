@@ -9,14 +9,25 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type SuccessHealthResponse struct {
+	Status          string `json:"status"`
+	Message         string `json:"message"`
+	Database_status string `json:"database_status"`
+}
+
+type ErrorHealthResponse struct {
+	Message string `json:"message"`
+	Status  string `json:"status"`
+}
+
 // HealthCheck handles the health check API and checks database connection
 // @Summary      Check server health
 // @Description  Returns the health status of the service and database
 // @Tags         Health
 // @Accept       json
 // @Produce      json
-// @Success      200  {object}  map[string]string
-// @Failure      500  {object}  map[string]string
+// @Success      200  {object}  SuccessHealthResponse
+// @Failure      500  {object}  ErrorHealthResponse
 // @Router       /health [get]
 func HealthCheck(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {

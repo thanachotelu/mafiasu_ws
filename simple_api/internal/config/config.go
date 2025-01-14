@@ -22,7 +22,7 @@ func LoadConfig() Config {
 		DBPassword: getEnv("DB_PASSWORD", "postgres123"),
 		DBName:     getEnv("DB_NAME", "postgres"),
 		APIToken:   getEnv("API_TOKEN", "fjwfji3399"),
-		APIPORT:    getEnv("API_PORT", "8000"),
+		APIPORT:    getEnv("API_PORT", "8080"),
 	}
 }
 

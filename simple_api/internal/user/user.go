@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"users/internal/config"
 
 	_ "github.com/lib/pq" // PostgreSQL driver
 )
@@ -24,12 +25,12 @@ type UserInput struct {
 var db *sql.DB
 
 // InitDB initializes the database connection
-func InitDB(host, port, user, password, dbname string) *sql.DB {
+func InitDB(cfg config.Config) *sql.DB {
 	var err error
 
 	// PostgreSQL connection string (DSN)
 	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBName)
 
 	// Open database connection
 	db, err = sql.Open("postgres", dsn)
@@ -135,11 +136,10 @@ func GetAllUsers(db *sql.DB) ([]User, error) {
 	return users, nil
 }
 
-func GetuserbyID(db *sql.DB , id int) ([]User, error) {
+func GetuserbyID(db *sql.DB, id int) ([]User, error) {
 	query := "SELECT id, name, email FROM users where id =$1"
-	
+
 	rows, err := db.Query(query, id)
-	
 
 	if err != nil {
 		log.Printf("Error querying users: %v", err)

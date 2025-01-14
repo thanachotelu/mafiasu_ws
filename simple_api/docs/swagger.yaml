@@ -1,6 +1,27 @@
 basePath: /
 definitions:
+  handler.ErrorHealthResponse:
+    properties:
+      message:
+        type: string
+      status:
+        type: string
+    type: object
   handler.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  handler.SuccessHealthResponse:
+    properties:
+      database_status:
+        type: string
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  handler.SuccessResponse:
     properties:
       message:
         type: string
@@ -64,15 +85,19 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/user.UserInput'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handler.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
       summary: Add a new user
       tags:
       - Post
@@ -93,9 +118,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handler.SuccessResponse'
         "400":
           description: Bad Request
           schema:
@@ -153,9 +176,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/user.UserInput'
         "404":
           description: Not Found
           schema:
@@ -174,15 +195,11 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handler.SuccessHealthResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handler.ErrorHealthResponse'
       summary: Check server health
       tags:
       - Health
