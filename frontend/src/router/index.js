@@ -21,10 +21,7 @@ const routes = [
     path: '/car-detail/:id',
     name: 'CarDetail',
     component: CarDetail,
-    props: (route) => ({
-      id: route.params.id,
-      carData: route.query.car ? JSON.parse(route.query.car) : null
-    })
+    props: true,
   },
   {
     path: '/short-rent-service',

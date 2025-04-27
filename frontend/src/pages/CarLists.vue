@@ -1,59 +1,52 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import axios from 'axios';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
 const selectedTypes = ref([]);
 const selectedBrands = ref([]);
-const selectedYears = ref([]);
+const selectedFuelTypes = ref([]); // Add this new ref
 const minPrice = ref('');
 const maxPrice = ref('');
 const searchQuery = ref('');
 
-const viewCarDetail = (carId) => {
-  const selectedCar = cars.value.find(car => car.id === carId);
-  router.push({
-    name: 'CarDetail',
-    params: { id: carId },
-    query: { car: JSON.stringify(selectedCar) }
-  });
+const cars = ref([]); // Initialize cars as an empty array
+
+const fetchCars = async () => {
+  try {
+    const response = await axios.get('http://localhost:8000/api/v1/cars'); // Replace with your backend URL
+    cars.value = response.data; // Assign the fetched data to cars
+  } catch (error) {
+    console.error('Failed to fetch cars:', error);
+  }
 };
 
-const cars = ref([
-  { id: 1, name: 'Toyota Corolla Cross', type: 'suv', brand: 'toyota', price: 859000, year: 2023, location: 'กรุงเทพมหานคร', km: 20000 },
-  { id: 2, name: 'Honda City RS', type: 'sedan', brand: 'honda', price: 769000, year: 2022, location: 'ชลบุรี', km: 15000 },
-  { id: 3, name: 'Ford Ranger Raptor', type: 'pickup', brand: 'ford', price: 1499000, year: 2023, location: 'ภูเก็ต', km: 8000 },
-  { id: 4, name: 'MG ZS', type: 'suv', brand: 'mg', price: 659000, year: 2021, location: 'เชียงใหม่', km: 35000 },
-  { id: 5, name: 'Mitsubishi Pajero Sport', type: 'suv', brand: 'mitsubishi', price: 1299000, year: 2020, location: 'นนทบุรี', km: 45000 },
-  { id: 6, name: 'Isuzu D-Max', type: 'pickup', brand: 'isuzu', price: 789000, year: 2022, location: 'สมุทรปราการ', km: 25000 },
-]);
+onMounted(() => {
+  fetchCars(); // Fetch cars when the component is mounted
+});
 
-const filterByYearRange = (carYear, selectedRange) => {
-  const rangeMap = {
-    '2023': [2023, 9999],
-    '2020-2022': [2020, 2022],
-    '2017-2019': [2017, 2019],
-    '2014-2016': [2014, 2016],
-  };
-  return selectedRange.some(range => {
-    const [start, end] = rangeMap[range];
-    return carYear >= start && carYear <= end;
+const viewCarDetail = (car) => {
+  router.push({
+    name: 'CarDetail',
+    params: { id: car.car_id }
   });
 };
 
 const filteredCars = computed(() => {
   return cars.value.filter(car => {
-    const matchType = selectedTypes.value.length ? selectedTypes.value.includes(car.type) : true;
-    const matchBrand = selectedBrands.value.length ? selectedBrands.value.includes(car.brand) : true;
-    const matchYear = selectedYears.value.length ? filterByYearRange(car.year, selectedYears.value) : true;
-    const matchMinPrice = minPrice.value ? car.price >= parseInt(minPrice.value) : true;
-    const matchMaxPrice = maxPrice.value ? car.price <= parseInt(maxPrice.value) : true;
-    const matchSearch = searchQuery.value ? 
-      car.name.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
-      car.location.toLowerCase().includes(searchQuery.value.toLowerCase()) : true;
-    
-    return matchType && matchBrand && matchYear && matchMinPrice && matchMaxPrice && matchSearch;
+    const matchType = selectedTypes.value.length ? selectedTypes.value.includes(car.cartype) : true;
+    const matchBrand = selectedBrands.value.length ? selectedBrands.value.includes(car.brand.toLowerCase()) : true;
+    const matchFuelType = selectedFuelTypes.value.length ? selectedFuelTypes.value.includes(car.fueltype) : true;
+    const matchMinPrice = minPrice.value ? car.rental_price_per_day >= parseInt(minPrice.value) : true;
+    const matchMaxPrice = maxPrice.value ? car.rental_price_per_day <= parseInt(maxPrice.value) : true;
+    const matchSearch = searchQuery.value
+      ? car.model.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+        car.brand.toLowerCase().includes(searchQuery.value.toLowerCase())
+      : true;
+
+    return matchType && matchBrand && matchFuelType && matchMinPrice && matchMaxPrice && matchSearch;
   });
 });
 </script>
@@ -63,15 +56,11 @@ const filteredCars = computed(() => {
     <!-- Search Bar Section -->
     <div class="search-bar-container">
       <div class="search-bar">
-        <input 
-          type="text" 
-          v-model="searchQuery" 
-          placeholder="ค้นหารถยนต์ (ชื่อรถหรือสถานที่)" 
-          class="search-input"
-        />
+        <input type="text" v-model="searchQuery" placeholder="ค้นหารถยนต์ (ชื่อรถหรือสถานที่)" class="search-input" />
         <button class="search-button">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+            <path
+              d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
           </svg>
         </button>
       </div>
@@ -82,12 +71,12 @@ const filteredCars = computed(() => {
       <div class="filter-section">
         <h2>ประเภทรถ</h2>
         <div class="filter-group">
-          <label><input type="checkbox" value="eco" v-model="selectedTypes" /> รถ ECO-Car</label>
-          <label><input type="checkbox" value="sedan" v-model="selectedTypes" /> รถเก๋ง (4ประตู Sedan)</label>
-          <label><input type="checkbox" value="suv" v-model="selectedTypes" /> รถ SUV (7 ที่นั่ง)</label>
-          <label><input type="checkbox" value="mpv" v-model="selectedTypes" /> รถอเนกประสงค์ (MPV)</label>
-          <label><input type="checkbox" value="van" v-model="selectedTypes" /> รถตู้</label>
-          <label><input type="checkbox" value="pickup" v-model="selectedTypes" /> รถกระบะ</label>
+          <label><input type="checkbox" value="รถยนต์ ECO-Car" v-model="selectedTypes" /> รถ ECO-Car</label>
+          <label><input type="checkbox" value="รถเก๋ง" v-model="selectedTypes" /> รถเก๋ง (Sedan)</label>
+          <label><input type="checkbox" value="เอนกประสงค์ MPV" v-model="selectedTypes" /> รถอเนกประสงค์ (MPV)</label>
+          <label><input type="checkbox" value="SUV" v-model="selectedTypes" /> รถ SUV</label>
+          <label><input type="checkbox" value="รถตู้" v-model="selectedTypes" /> รถตู้</label>
+          <label><input type="checkbox" value="กระบะ 4 ประตู" v-model="selectedTypes" /> รถกระบะ</label>
         </div>
 
         <h2>ยี่ห้อรถ</h2>
@@ -97,8 +86,13 @@ const filteredCars = computed(() => {
           <label><input type="checkbox" value="isuzu" v-model="selectedBrands" /> อีซูซุ (Isuzu)</label>
           <label><input type="checkbox" value="mitsubishi" v-model="selectedBrands" /> มิตซูบิชิ (Mitsubishi)</label>
           <label><input type="checkbox" value="ford" v-model="selectedBrands" /> ฟอร์ด (Ford)</label>
-          <label><input type="checkbox" value="mg" v-model="selectedBrands" /> MG</label>
           <label><input type="checkbox" value="hyundai" v-model="selectedBrands" /> อุนได (Hyundai)</label>
+        </div>
+
+        <h2>ประเภทเชื้อเพลิง</h2>
+        <div class="filter-group">
+          <label><input type="checkbox" value="เบนซิน" v-model="selectedFuelTypes" /> เบนซิน</label>
+          <label><input type="checkbox" value="ดีเซล" v-model="selectedFuelTypes" /> ดีเซล</label>
         </div>
 
         <h2>ช่วงราคา</h2>
@@ -110,13 +104,6 @@ const filteredCars = computed(() => {
           </div>
         </div>
 
-        <h2>ปีรถ</h2>
-        <div class="filter-group">
-          <label><input type="checkbox" value="2023" v-model="selectedYears" /> 2023-ปัจจุบัน</label>
-          <label><input type="checkbox" value="2020-2022" v-model="selectedYears" /> 2020-2022</label>
-          <label><input type="checkbox" value="2017-2019" v-model="selectedYears" /> 2017-2019</label>
-          <label><input type="checkbox" value="2014-2016" v-model="selectedYears" /> 2014-2016</label>
-        </div>
       </div>
 
       <!-- Car List Section -->
@@ -125,13 +112,13 @@ const filteredCars = computed(() => {
           <h1>รถทั้งหมด [{{ filteredCars.length }}]</h1>
         </div>
         <div class="car-grid">
-          <div v-for="car in filteredCars" :key="car.id" class="car-card" @click="viewCarDetail(car.id)">
+          <div v-for="car in filteredCars" :key="car.car_id" class="car-card" @click="viewCarDetail(car)">
             <div class="car-image-placeholder">[รูป]</div>
             <div class="car-info">
-              <h3>{{ car.name }}</h3>
-              <p class="price">฿{{ car.price.toLocaleString() }}</p>
-              <p class="details">{{ car.year }} · {{ car.km.toLocaleString() }} km · เกียร์อัตโนมัติ</p>
-              <p class="location">{{ car.location }}</p>
+              <h3>{{ car.brand }} {{ car.model }}</h3>
+              <p class="price">฿{{ car.rental_price_per_day.toLocaleString() }}</p>
+              <p class="details">{{ car.cartype }} · {{ car.seat }} seats · {{ car.fueltype }}</p>
+              <p class="location">{{ car.license_plate }}</p>
             </div>
           </div>
         </div>
@@ -159,7 +146,7 @@ const filteredCars = computed(() => {
   display: flex;
   max-width: 600px;
   width: 100%;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border-radius: 30px;
   overflow: hidden;
 }
@@ -196,10 +183,11 @@ const filteredCars = computed(() => {
 
 .filter-section {
   width: 270px;
+  height: fit-content;
   padding: 20px;
   background: #f8f8f8;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .filter-section h2 {
@@ -271,7 +259,7 @@ const filteredCars = computed(() => {
   background: white;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s;
 }
 
@@ -305,7 +293,8 @@ const filteredCars = computed(() => {
   margin: 5px 0;
 }
 
-.details, .location {
+.details,
+.location {
   font-size: 0.9rem;
   color: #666;
   margin: 5px 0;
@@ -315,11 +304,11 @@ const filteredCars = computed(() => {
   .search-container {
     flex-direction: column;
   }
-  
+
   .filter-section {
     width: 100%;
   }
-  
+
   .car-grid {
     grid-template-columns: 1fr;
   }

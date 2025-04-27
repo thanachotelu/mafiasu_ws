@@ -20,37 +20,32 @@
 
               <div class="car-specs">
                   <div class="spec-item">
-                      <span class="spec-label">ปีรถ</span>
-                      <span class="spec-value">{{ car.year }}</span>
+                      <span class="spec-label">ประเภท</span>
+                      <span class="spec-value">{{ car.type }}</span>
                   </div>
                   <div class="spec-item">
+                      <span class="spec-label">เกียร์</span>
+                      <span class="spec-value">{{ car.gear }}</span>
+                  </div>
+                  <div class="spec-item">
+                      <span class="spec-label">ทะเบียน</span>
+                      <span class="spec-value">{{ car.license_plate }}</span>
+                  </div>
+                  <div v-if="car.km" class="spec-item">
                       <span class="spec-label">ระยะทาง</span>
                       <span class="spec-value">{{ car.km.toLocaleString() }} km</span>
                   </div>
                   <div class="spec-item">
-                      <span class="spec-label">สถานที่</span>
-                      <span class="spec-value">{{ car.location }}</span>
-                  </div>
-                  <div class="spec-item">
-                      <span class="spec-label">ยี่ห้อ</span>
-                      <span class="spec-value">{{ getBrandName(car.brand) }}</span>
-                  </div>
-                  <div class="spec-item">
-                      <span class="spec-label">ประเภท</span>
-                      <span class="spec-value">{{ getTypeName(car.type) }}</span>
+                      <span class="spec-label">ประเภทเชื้อเพลิง</span>
+                      <span class="spec-value">{{ car.fuel }}</span>
                   </div>
               </div>
           </div>
 
           <div class="car-description">
               <h2>รายละเอียดเพิ่มเติม</h2>
-              <p>รถ {{ car.name }} สภาพดี {{ car.year }} ระยะทาง {{ car.km.toLocaleString() }} km ราคา {{
-                  car.price.toLocaleString() }} บาท</p>
+              <p>{{ car.name }} ทะเบียน {{ car.license_plate }} ราคาเช่า {{ car.price.toLocaleString() }} บาทต่อวัน</p>
           </div>
-
-          <!-- <div class="contact-seller">
-              <button class="contact-button">ติดต่อผู้ขาย</button>
-          </div> -->
       </div>
   </div>
   <div v-else class="error-message">
@@ -62,25 +57,44 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import axios from 'axios';
 
 const router = useRouter();
+const route = useRoute();
 
-// ประกาศ props ก่อนใช้งาน
-const props = defineProps({
-  id: {
-      type: String,
-      required: true
-  },
-  carData: {
-      type: Object,
-      default: null
-  }
+const car = ref({
+  name: '',
+  price: 0,
+  gear:'',
+  license_plate: '',
+  brand: '',
+  type: '',
+  fuel: ''
 });
 
-const route = useRoute();
-const car = ref({});
+const fetchCarData = async () => {
+  try {
+    const response = await axios.get(`http://localhost:8000/api/v1/cars/${route.params.id}`);
+    const carData = response.data;
+    car.value = {
+      name: `${carData.brand} ${carData.model}`,
+      price: carData.rental_price_per_day,
+      gear: carData.geartype,
+      license_plate: carData.license_plate,
+      brand: carData.brand.toLowerCase(),
+      type: carData.cartype,
+      fuel: carData.fueltype
+    };
+  } catch (error) {
+    console.error('Failed to fetch car details:', error);
+  }
+};
+
+onMounted(() => {
+  fetchCarData();
+});
 
 const brandNames = {
   toyota: 'โตโยต้า',
@@ -91,25 +105,8 @@ const brandNames = {
   mg: 'เอ็มจี'
 };
 
-const typeNames = {
-  sedan: 'รถเก๋ง',
-  suv: 'รถ SUV',
-  pickup: 'รถกระบะ',
-  hatchback: 'รถแฮทช์แบค'
-};
-
-if (props.carData) {
-  car.value = props.carData;
-} else if (route.query.car) {
-  car.value = JSON.parse(route.query.car);
-}
-
 const getBrandName = (brandKey) => {
   return brandNames[brandKey] || brandKey;
-};
-
-const getTypeName = (typeKey) => {
-  return typeNames[typeKey] || typeKey;
 };
 
 const goBack = () => {

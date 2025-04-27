@@ -7,12 +7,15 @@ import (
 )
 
 func RegisterBookingRoutes(r *gin.Engine, bookingHandlers *handler.BookingHandler) {
-	bookings := r.Group("/bookings")
+	v1 := r.Group("/api/v1")
 	{
-		bookings.GET("", bookingHandlers.GetAllBooking)
-		bookings.GET("/:id", bookingHandlers.GetBookingByID)
-		bookings.POST("", bookingHandlers.AddBooking)
-		bookings.PUT("/:id", bookingHandlers.UpdateBooking)
-		bookings.DELETE("/:id", bookingHandlers.DeleteBooking)
+		bookings := v1.Group("/bookings")
+		{
+			bookings.GET("", bookingHandlers.GetAllBooking)
+			bookings.GET("/:id", bookingHandlers.GetBookingByID)
+			bookings.POST("", bookingHandlers.AddBooking)
+			bookings.PUT("/:id", bookingHandlers.UpdateBooking)
+			bookings.DELETE("/:id", bookingHandlers.DeleteBooking)
+		}
 	}
 }
