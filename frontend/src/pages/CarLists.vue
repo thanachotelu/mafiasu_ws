@@ -113,7 +113,12 @@ const filteredCars = computed(() => {
         </div>
         <div class="car-grid">
           <div v-for="car in filteredCars" :key="car.car_id" class="car-card" @click="viewCarDetail(car)">
-            <div class="car-image-placeholder">[รูป]</div>
+            <div class="car-image">
+              <img 
+                :src="`/src/assets/images/cars/${car.model}.png`" 
+                :alt="car.model"
+              />
+            </div>
             <div class="car-info">
               <h3>{{ car.brand }} {{ car.model }}</h3>
               <p class="price">฿{{ car.rental_price_per_day.toLocaleString() }}</p>
@@ -267,13 +272,24 @@ const filteredCars = computed(() => {
   transform: translateY(-5px);
 }
 
-.car-image-placeholder {
+.car-image {
   height: 180px;
-  background: #e0e0e0;
+  background: #f8f8f8;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #999;
+  overflow: hidden;
+}
+
+.car-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.car-card:hover .car-image img {
+  transform: scale(1.05);
 }
 
 .car-info {

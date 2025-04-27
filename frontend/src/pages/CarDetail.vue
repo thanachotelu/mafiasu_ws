@@ -14,32 +14,35 @@
           </div>
 
           <div class="car-details">
-              <div class="car-image-placeholder">
-                  [รูปภาพรถ {{ car.name }}]
-              </div>
+            <div class="car-image">
+              <img 
+                :src="`/src/assets/images/cars/${carData.model}.png`" 
+                :alt="car.name"
+                              />
+            </div>
 
-              <div class="car-specs">
-                  <div class="spec-item">
-                      <span class="spec-label">ประเภท</span>
-                      <span class="spec-value">{{ car.type }}</span>
-                  </div>
-                  <div class="spec-item">
-                      <span class="spec-label">เกียร์</span>
-                      <span class="spec-value">{{ car.gear }}</span>
-                  </div>
-                  <div class="spec-item">
-                      <span class="spec-label">ทะเบียน</span>
-                      <span class="spec-value">{{ car.license_plate }}</span>
-                  </div>
-                  <div v-if="car.km" class="spec-item">
-                      <span class="spec-label">ระยะทาง</span>
-                      <span class="spec-value">{{ car.km.toLocaleString() }} km</span>
-                  </div>
-                  <div class="spec-item">
-                      <span class="spec-label">ประเภทเชื้อเพลิง</span>
-                      <span class="spec-value">{{ car.fuel }}</span>
-                  </div>
-              </div>
+            <div class="car-specs">
+                <div class="spec-item">
+                    <span class="spec-label">ประเภท</span>
+                    <span class="spec-value">{{ car.type }}</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">เกียร์</span>
+                    <span class="spec-value">{{ car.gear }}</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">ทะเบียน</span>
+                    <span class="spec-value">{{ car.license_plate }}</span>
+                </div>
+                <div v-if="car.km" class="spec-item">
+                    <span class="spec-label">ระยะทาง</span>
+                    <span class="spec-value">{{ car.km.toLocaleString() }} km</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">ประเภทเชื้อเพลิง</span>
+                    <span class="spec-value">{{ car.fuel }}</span>
+                </div>
+            </div>
           </div>
 
           <div class="car-description">
@@ -74,18 +77,23 @@ const car = ref({
   fuel: ''
 });
 
+const carData = ref({
+  model: ''
+});
+
 const fetchCarData = async () => {
   try {
     const response = await axios.get(`http://localhost:8000/api/v1/cars/${route.params.id}`);
-    const carData = response.data;
+    const data = response.data;
+    carData.value = data; // Store the full car data
     car.value = {
-      name: `${carData.brand} ${carData.model}`,
-      price: carData.rental_price_per_day,
-      gear: carData.geartype,
-      license_plate: carData.license_plate,
-      brand: carData.brand.toLowerCase(),
-      type: carData.cartype,
-      fuel: carData.fueltype
+      name: `${data.brand} ${data.model}`,
+      price: data.rental_price_per_day,
+      gear: data.geartype,
+      license_plate: data.license_plate,
+      brand: data.brand.toLowerCase(),
+      type: data.cartype,
+      fuel: data.fueltype
     };
   } catch (error) {
     console.error('Failed to fetch car details:', error);
@@ -102,11 +110,7 @@ const brandNames = {
   isuzu: 'อีซูซุ',
   mitsubishi: 'มิตซูบิชิ',
   ford: 'ฟอร์ด',
-  mg: 'เอ็มจี'
-};
-
-const getBrandName = (brandKey) => {
-  return brandNames[brandKey] || brandKey;
+  hyundai: 'ฮุนได',
 };
 
 const goBack = () => {
@@ -176,7 +180,7 @@ const goBack = () => {
   margin-bottom: 30px;
 }
 
-.car-image-placeholder {
+.car-image {
   flex: 1;
   min-height: 400px;
   background: #f5f5f5;
@@ -186,6 +190,13 @@ const goBack = () => {
   border-radius: 8px;
   font-size: 1.2rem;
   color: #666;
+}
+
+.car-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
 }
 
 .car-specs {
@@ -263,7 +274,7 @@ const goBack = () => {
       flex: 1;
   }
 
-  .car-image-placeholder {
+  .car-image {
       min-height: 250px;
   }
 }
