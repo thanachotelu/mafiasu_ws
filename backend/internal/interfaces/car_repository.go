@@ -1,14 +1,14 @@
 package interfaces
 
-// import (
-// 	"context"
-// 	"mafiasu_ws/internal/models"
-// )
+import (
+	"context"
+	"mafiasu_ws/internal/models"
+)
 
 type CarRepository interface {
-	GetCarByID()
-	GetAllCars()
-	AddCar()
-	UpdateCar()
-	DeleteCar()
+	GetCarByID(ctx context.Context, id string) (models.Car, error)
+	GetAllCars(ctx context.Context) ([]models.Car, error)
+	AddCar(ctx context.Context, car models.CreateCarRequest) (models.Car, error)
+	UpdateCar(ctx context.Context, id string, car models.Car) (models.Car, error)
+	DeleteCar(ctx context.Context, id string) (models.Car, error)
 }

@@ -75,3 +75,51 @@ CREATE TABLE data (
     id SERIAL PRIMARY KEY,
     content TEXT NOT NULL
 );
+
+INSERT INTO users (username, password_hash, firstname, lastname, phonenumber, email, role, status)
+VALUES
+(
+    'thanachote',
+    '$2a$12$Rm6efilT4b3OnTX/kVbgsujIehgJEfjNXme.VUWDJYoaa6qFTBBqu',
+    'Thanachote',
+    'Keakwanwong',
+    '0891234567',
+    'thanachote@example.com',
+    'admin', 
+    'active'
+),
+(
+    'saturn',
+    '$2a$12$ERh6a1Izt5py9iw3DEyFgeDE0CgdNidh801s3YOQ2aPSuoHUkWUdO',
+    'Saturn',
+    'Thanakul',
+    '0907654321',
+    'saturn@example.com',
+    'user', 
+    'active'
+);
+
+INSERT INTO cars (brand, model, license_plate, cartype, seat, doors, geartype, fueltype, rental_price_per_day, status, created_at, updated_at) VALUES
+('Toyota', 'Hiace', '1 กย 5012', 'รถตู้', 12, 4, 'อัตโนมัติ', 'เบนซิน', 2080.00, 'active', NOW(), NOW()),
+('Toyota', 'Commuter', '2กข 4821', 'รถตู้', 12, 4, 'อัตโนมัติ', 'เบนซิน', 2180.00, 'active', NOW(), NOW()),
+('Hyundai', 'Staria', '4ขจ 1739', 'รถตู้', 11, 4, 'อัตโนมัติ', 'เบนซิน', 3180.00, 'active', NOW(), NOW()),
+('Hyundai', 'New H1 รุ่น Elite เสริมประตูไฟฟ้า', '5งบ 9273', 'รถตู้', 7, 5, 'อัตโนมัติ', 'ดีเซล', 2500.00, 'active', NOW(), NOW()),
+('Toyota', 'Fortuner', '1 กย 5012', 'SUV', 7, 4, 'อัตโนมัติ', 'เบนซิน', 1880.00, 'active', NOW(), NOW()),
+('Toyota', 'Sienta', '3คด 0152', 'รถตู้', 7, 4, 'อัตโนมัติ', 'เบนซิน', 1320.00, 'active', NOW(), NOW()),
+('Toyota', 'Avanza', '1จร 6048', 'รถตู้', 7, 4, 'อัตโนมัติ', 'เบนซิน', 1320.00, 'active', NOW(), NOW()),
+('Toyota', 'Camry', '7ขท 8317', 'รถเก๋ง', 5, 4, 'อัตโนมัติ', 'เบนซิน', 1780.00, 'active', NOW(), NOW()),
+('Honda', 'Accord', '2ณฟ 7921', 'รถเก๋ง', 5, 4, 'อัตโนมัติ', 'เบนซิน', 2200.00, 'active', NOW(), NOW()),
+('Toyota', 'New Hybrid Camry', '9ดน 3106', 'รถเก๋ง', 5, 4, 'อัตโนมัติ', 'เบนซิน', 2180.00, 'active', NOW(), NOW()),
+('Honda', 'Accord 1.5 TURBO', '6นย 5045', 'Sedan', 5, 4, 'อัตโนมัติ', 'เบนซิน', 1850.00, 'active', NOW(), NOW()),
+('Isuzu', 'D-Max Cab4 1.9AT', '8พค 1698', 'กระบะ 4 ประตู', 5, 4, 'อัตโนมัติ CVT', 'ดีเซล', 1690.00, 'active', NOW(), NOW()),
+('Mitsubishi', 'Xpander All New (2024)', '8ปพ 2874', 'เอนกประสงค์ MPV', 7, 5, 'อัตโนมัติ CVT', 'เบนซิน', 1590.00, 'active', NOW(), NOW()),
+('Isuzu', 'All New Mu-X', '3บว 1360', 'SUV', 7, 5, 'อัตโนมัติ 6 สปีด', 'ดีเซล', 2300.00, 'active', NOW(), NOW()),
+('Honda', 'City 1.0 Turbo (RS)', 'ศน 2483', 'รถยนต์ ECO-Car', 5, 4, 'อัตโนมัติ', 'เบนซิน', 1390.00, 'active', NOW(), NOW()),
+('Honda', 'City 1.0 Turbo (RS)', '5พษ 9185', 'รถยนต์ ECO-Car', 5, 4, 'อัตโนมัติ', 'เบนซิน', 1390.00, 'active', NOW(), NOW()),
+('Hyundai', 'New H1 รุ่น Elite เสริมประตูไฟฟ้า', '7สข 4871', 'MPV VAN', 7, 5, 'อัตโนมัติ', 'ดีเซล', 2500.00, 'active', NOW(), NOW()),
+('Toyota', 'Yaris', 'ภค 7012', 'รถยนต์ ECO-Car', 5, 4, 'อัตโนมัติ', 'เบนซิน', 780.00, 'active', NOW(), NOW()),
+('Toyota', 'Vios', 'มช 5239', 'รถยนต์ ECO-Car', 5, 4, 'อัตโนมัติ', 'เบนซิน', 980.00, 'active', NOW(), NOW()),
+('Toyota', 'Altis', '8กฟ 6524', 'รถยนต์ ECO-Car', 5, 4, 'อัตโนมัติ', 'เบนซิน', 1200.00, 'active', NOW(), NOW()),
+('Toyota', 'Revo', '9ณว 2157', 'กระบะ 4 ประตู', 5, 4, 'อัตโนมัติ CVT', 'ดีเซล', 1200.00, 'active', NOW(), NOW()),
+('Isuzu', 'D-Max', '3ณจ 5097', 'กระบะ 4 ประตู', 5, 4, 'อัตโนมัติ CVT', 'ดีเซล', 1250.00, 'active', NOW(), NOW()),
+('Ford', 'Ranger', '7ขบ 1482', 'กระบะ 4 ประตู', 5, 4, 'อัตโนมัติ CVT', 'ดีเซล', 1100.00, 'active', NOW(), NOW());
