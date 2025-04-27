@@ -1,0 +1,86 @@
+/* navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px; /* Added horizontal padding to create space from the border */
+  border-bottom: 1px solid #eee;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+}
+
+.logo img {
+  height: 40px; /* Adjust this value based on your logo size */
+  width: auto;
+}
+
+.logo h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+}
+
+.nav-links {
+  display: flex;
+  margin-right: 10px; /* Adds space between the nav-links and the right edge */
+}
+
+.nav-link {
+  margin-left: 20px;
+  text-decoration: none;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.nav-link:hover {
+  color: #000;
+  text-decoration: underline;
+}
+/* navbar (end) */
+
+/* Logout Popup */
+.popup {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #4caf50;
+  color: white;
+  padding: 15px 25px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  animation: slide-in 0.3s ease-out;
+  z-index: 1000;
+}
+
+.fade-out {
+  animation: fade-out 0.5s ease-out forwards;
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+/* Logout Popup (end)*/

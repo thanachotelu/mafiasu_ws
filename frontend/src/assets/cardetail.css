@@ -1,0 +1,57 @@
+.car-detail-container {
+  margin-bottom: 40px;
+}
+
+.car-title {
+  font-size: 2.5rem;
+  margin: 30px 0;
+}
+
+.car-details {
+  display: flex;
+}
+
+.car-image {
+  flex: 1;
+  height: 300px;
+  background-color: #f0f0f0;
+  border-radius: 10px;
+}
+
+.car-info {
+  flex: 1;
+  padding-left: 20px;
+}
+
+.info-item {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.info-date-container {
+  margin-right: 10px;
+  min-width: 60px;
+}
+
+.info-date {
+  font-weight: bold;
+}
+
+.date-subtext {
+  font-size: 0.8rem;
+  color: #555;
+  margin-top: 2px;
+}
+
+.info-content {
+  margin-left: 15px;
+}
+
+.info-content h3 {
+  margin-bottom: 5px;
+}
+
+.info-content p {
+  color: #555;
+  font-size: 0.9rem;
+}
