@@ -1,21 +1,20 @@
 # Build Stage
 FROM golang:1.24.2 AS builder
 
-# WORKDIR /app
+ WORKDIR /app
 
-# COPY go.mod go.sum ./
-# RUN go mod download
+COPY go.mod go.sum ./
+RUN go mod download
 
-# COPY . .
-# RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./cmd
+ COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./cmd
 
-# # Run Stage
-# FROM alpine:latest  
+# Run Stage
+FROM alpine:latest  
+ RUN apk --no-cache add ca-certificates tzdata
 
-# RUN apk --no-cache add ca-certificates tzdata
+WORKDIR /root/
 
-# WORKDIR /root/
+COPY --from=builder /app/main .
 
-# COPY --from=builder /app/main .
-
-# ENTRYPOINT ["./main"]
+ENTRYPOINT ["./main"]

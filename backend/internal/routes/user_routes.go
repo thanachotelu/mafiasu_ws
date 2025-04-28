@@ -12,10 +12,10 @@ func RegisterRoutes(r *gin.Engine, userHandlers *handler.UserHandler) {
 		users := v1.Group("/users")
 		{
 			users.GET("/:id", userHandlers.GetUserByID)
-			// users.GET("", userHandlers.GetAllUsers)
-			// users.POST("", userHandlers.AddUser)
-			// users.PUT("/:id", userHandlers.UpdateUser)
-			// users.DELETE("/:id", userHandlers.DeleteUser)
+			 //users.GET("", userHandlers.GetAllUsers)
+			 users.POST("/register", userHandlers.AddUser)
+			 //users.PUT("/:id", userHandlers.UpdateUser)
+			 //users.DELETE("/:id", userHandlers.DeleteUser)
 		}
 	}
 }

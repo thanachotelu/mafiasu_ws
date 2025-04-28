@@ -8,8 +8,9 @@ import (
 )
 
 type Config struct {
-	AppPort     string
-	DatabaseURL string
+	AppPort           string
+	DatabaseURL       string
+	KeycloakPublicKey string // เพิ่ม field สำหรับเก็บ Keycloak Public Key
 }
 
 func New() (*Config, error) {
@@ -18,9 +19,10 @@ func New() (*Config, error) {
 
 	config := &Config{
 		AppPort: viper.GetString("APP_PORT"),
+		KeycloakPublicKey: viper.GetString("KEYCLOAK_PUBLIC_KEY"),
 	}
 
-	//constructor DatabaseURL
+	// Constructor DatabaseURL
 	config.DatabaseURL = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		viper.GetString("POSTGRES_HOST"),
 		viper.GetString("POSTGRES_PORT"),
@@ -29,6 +31,9 @@ func New() (*Config, error) {
 		viper.GetString("POSTGRES_DB"),
 		viper.GetString("POSTGRES_SSLMODE"),
 	)
+
+	// โหลด Public Key จาก .env
+	config.KeycloakPublicKey = viper.GetString("KEYCLOAK_PUBLIC_KEY")
 
 	return config, nil
 }
