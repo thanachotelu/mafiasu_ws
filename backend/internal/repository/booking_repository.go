@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"mafiasu_ws/internal/models"
 
@@ -49,7 +50,7 @@ func (r *bookingRepository) GetBookingByID(ctx context.Context, id string) (mode
 
 func (r *bookingRepository) GetAllBooking(ctx context.Context) ([]models.Booking, error) {
 	rows, err := r.db.Query(ctx, `
-		SELECT book_id, user_id, car_id, affiliator_id, total_price, pickup_date, return_date, status, created_at, updated_at
+		SELECT book_id, session_id, user_id, car_id, affiliator_id, total_price, pickup_date, return_date, status, created_at, updated_at
 		FROM booking
 	`)
 	if err != nil {
@@ -60,20 +61,29 @@ func (r *bookingRepository) GetAllBooking(ctx context.Context) ([]models.Booking
 	var bookings []models.Booking
 	for rows.Next() {
 		var booking models.Booking
-		if err := rows.Scan(
+		var pickupDate, returnDate time.Time
+
+		err := rows.Scan(
 			&booking.BookID,
+			&booking.SessionID,
 			&booking.UserID,
 			&booking.CarID,
 			&booking.AffiliatorID,
 			&booking.TotalPrice,
-			&booking.PickupDate,
-			&booking.ReturnDate,
+			&pickupDate,
+			&returnDate,
 			&booking.Status,
 			&booking.CreatedAt,
 			&booking.UpdatedAt,
-		); err != nil {
-			return nil, err
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan booking: %w", err)
 		}
+
+		// แปลง Date -> String
+		booking.PickupDate = pickupDate.Format("2006-01-02")
+		booking.ReturnDate = returnDate.Format("2006-01-02")
+
 		bookings = append(bookings, booking)
 	}
 
@@ -82,23 +92,31 @@ func (r *bookingRepository) GetAllBooking(ctx context.Context) ([]models.Booking
 
 func (r *bookingRepository) AddBooking(ctx context.Context, booking models.BookingRequest) (models.Booking, error) {
 	var newBooking models.Booking
+	var pickupDate, returnDate time.Time
+
 	err := r.db.QueryRow(ctx, `
-		INSERT INTO booking (user_id, car_id, affiliator_id, total_price, pickup_date, return_date, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
-		RETURNING book_id, user_id, car_id, affiliator_id, total_price, pickup_date, return_date, created_at, updated_at
+		INSERT INTO booking (
+			user_id, car_id, total_price, pickup_date, return_date, created_at, updated_at
+		) 
+		VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+		RETURNING 
+			book_id, session_id, user_id, car_id, affiliator_id, total_price, pickup_date, return_date, status, created_at, updated_at
 	`,
 		booking.UserID,
 		booking.CarID,
-		booking.AffiliatorID,
 		booking.TotalPrice,
+		booking.PickupDate,
+		booking.ReturnDate,
 	).Scan(
 		&newBooking.BookID,
+		&newBooking.SessionID,
 		&newBooking.UserID,
 		&newBooking.CarID,
 		&newBooking.AffiliatorID,
 		&newBooking.TotalPrice,
-		&newBooking.PickupDate,
-		&newBooking.ReturnDate,
+		&pickupDate,
+		&returnDate,
+		&newBooking.Status,
 		&newBooking.CreatedAt,
 		&newBooking.UpdatedAt,
 	)
@@ -106,16 +124,24 @@ func (r *bookingRepository) AddBooking(ctx context.Context, booking models.Booki
 	if err != nil {
 		return models.Booking{}, fmt.Errorf("failed to add booking: %w", err)
 	}
+
+	// แปลง Date -> String
+	newBooking.PickupDate = pickupDate.Format("2006-01-02")
+	newBooking.ReturnDate = returnDate.Format("2006-01-02")
+
 	return newBooking, nil
 }
 
 func (r *bookingRepository) UpdateBooking(ctx context.Context, id string, booking models.Booking) (models.Booking, error) {
 	var updatedBooking models.Booking
+	var pickupDate, returnDate time.Time
+
 	err := r.db.QueryRow(ctx, `
 		UPDATE booking
-		SET user_id=$1, car_id=$2, affiliator_id=$3, total_price=$4, status=$5 updated_at=NOW()
+		SET user_id=$1, car_id=$2, affiliator_id=$3, total_price=$4, status=$5, updated_at=NOW()
 		WHERE book_id=$6
-		RETURNING book_id, user_id, car_id, affiliator_id, total_price, created_at, updated_at
+		RETURNING 
+			book_id, session_id, user_id, car_id, affiliator_id, total_price, pickup_date, return_date, status, created_at, updated_at
 	`,
 		booking.UserID,
 		booking.CarID,
@@ -125,10 +151,13 @@ func (r *bookingRepository) UpdateBooking(ctx context.Context, id string, bookin
 		id,
 	).Scan(
 		&updatedBooking.BookID,
+		&updatedBooking.SessionID,
 		&updatedBooking.UserID,
 		&updatedBooking.CarID,
 		&updatedBooking.AffiliatorID,
 		&updatedBooking.TotalPrice,
+		&pickupDate,
+		&returnDate,
 		&updatedBooking.Status,
 		&updatedBooking.CreatedAt,
 		&updatedBooking.UpdatedAt,
@@ -137,23 +166,32 @@ func (r *bookingRepository) UpdateBooking(ctx context.Context, id string, bookin
 	if err != nil {
 		return models.Booking{}, fmt.Errorf("failed to update booking: %w", err)
 	}
+
+	// แปลง Date -> String
+	updatedBooking.PickupDate = pickupDate.Format("2006-01-02")
+	updatedBooking.ReturnDate = returnDate.Format("2006-01-02")
+
 	return updatedBooking, nil
 }
 
 func (r *bookingRepository) DeleteBooking(ctx context.Context, id string) (models.Booking, error) {
 	var deletedBooking models.Booking
+	var pickupDate, returnDate time.Time
+
 	err := r.db.QueryRow(ctx, `
 		DELETE FROM booking
 		WHERE book_id = $1
-		RETURNING book_id, user_id, car_id, affiliator_id, total_price, pickup_date, return_date, status, created_at, updated_at
+		RETURNING 
+			book_id, session_id, user_id, car_id, affiliator_id, total_price, pickup_date, return_date, status, created_at, updated_at
 	`, id).Scan(
 		&deletedBooking.BookID,
+		&deletedBooking.SessionID,
 		&deletedBooking.UserID,
 		&deletedBooking.CarID,
 		&deletedBooking.AffiliatorID,
 		&deletedBooking.TotalPrice,
-		&deletedBooking.PickupDate,
-		&deletedBooking.ReturnDate,
+		&pickupDate,
+		&returnDate,
 		&deletedBooking.Status,
 		&deletedBooking.CreatedAt,
 		&deletedBooking.UpdatedAt,
@@ -162,5 +200,10 @@ func (r *bookingRepository) DeleteBooking(ctx context.Context, id string) (model
 	if err != nil {
 		return models.Booking{}, fmt.Errorf("failed to delete booking: %w", err)
 	}
+
+	// แปลง Date -> String
+	deletedBooking.PickupDate = pickupDate.Format("2006-01-02")
+	deletedBooking.ReturnDate = returnDate.Format("2006-01-02")
+
 	return deletedBooking, nil
 }
