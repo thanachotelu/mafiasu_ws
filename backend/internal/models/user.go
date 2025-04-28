@@ -16,17 +16,6 @@ type User struct {
 	Status       string    `db:"status" json:"status"`
 }
 
-type UserResponse struct {
-	UserID      string `json:"user_id"`
-	Username    string `json:"username"`
-	Firstname   string `json:"firstname"`
-	Lastname    string `json:"lastname"`
-	Phonenumber string `json:"phonenumber"`
-	Email       string `json:"email"`
-	Role        string `json:"role"`
-	Status      string `json:"status"`
-}
-
 type CreateUserRequest struct {
 	Username    string `json:"username" binding:"required"`
 	Password    string `json:"password" binding:"required"`
@@ -42,6 +31,6 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	Token string       `json:"token"`
-	User  UserResponse `json:"user"`
+	Token string `json:"token"`
+	User  User   `json:"user"`
 }
