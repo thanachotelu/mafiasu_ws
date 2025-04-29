@@ -89,7 +89,7 @@ func (r *carRepository) AddCar(ctx context.Context, car models.CreateCarRequest)
 
 	err := r.db.QueryRow(ctx, `
 		INSERT INTO cars (brand, model, license_plate, cartype, seat, doors, geartype, fueltype, rental_price_per_day, status, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'available', NOW(), NOW())
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'active', NOW(), NOW())
 		RETURNING car_id, brand, model, license_plate, cartype, seat, doors, geartype, fueltype, rental_price_per_day, status, created_at, updated_at
 	`,
 		car.Brand, car.Model, car.LicensePlate, car.CarType, car.Seat, car.Doors, car.GearType, car.FuelType, car.RentalPricePerDay,

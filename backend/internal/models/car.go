@@ -19,13 +19,14 @@ type Car struct {
 }
 
 type CreateCarRequest struct {
-	Brand             string  `db:"brand"`
-	Model             string  `db:"model"`
-	LicensePlate      string  `db:"license_plate"`
-	CarType           string  `db:"cartype"`
-	Seat              int     `db:"seat"`
-	Doors             int     `db:"doors"`
-	GearType          string  `db:"geartype"`
-	FuelType          string  `db:"fueltype"`
-	RentalPricePerDay float64 `db:"rental_price_per_day"`
+	Brand             string  `json:"brand" db:"brand"`
+	Model             string  `json:"model" db:"model"`
+	LicensePlate      string  `json:"license_plate" db:"license_plate"`
+	CarType           string  `json:"cartype" db:"cartype"`
+	Seat              int     `json:"seat" db:"seat"`
+	Doors             int     `json:"doors" db:"doors"`
+	GearType          string  `json:"geartype" db:"geartype"`
+	FuelType          string  `json:"fueltype" db:"fueltype"`
+	RentalPricePerDay float64 `json:"rental_price_per_day" db:"rental_price_per_day"`
+	Status            string  `json:"status" db:"status"`
 }

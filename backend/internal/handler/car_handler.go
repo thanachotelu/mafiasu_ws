@@ -47,7 +47,7 @@ func (h *CarHandler) GetCarByID(c *gin.Context) {
 // @Accept      json
 // @Produce     json
 // @Param       car body models.CreateCarRequest true "Car object"
-// @Success     200 {array} models.Car
+// @Success     201 {array} models.Car
 // @Failure     500 {object} ErrorResponse
 // @Router      /cars [post]
 func (h *CarHandler) AddCar(c *gin.Context) {
@@ -56,6 +56,8 @@ func (h *CarHandler) AddCar(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	req.Status = "active"
 
 	car, err := h.carService.AddCar(c.Request.Context(), req)
 	if err != nil {
@@ -72,26 +74,34 @@ func (h *CarHandler) AddCar(c *gin.Context) {
 // @Accept      json
 // @Produce     json
 // @Param       id path string true "Car ID"
-// @Param       car body models.CreateCarRequest true "Car object"
+// @Param		car body models.CreateCarRequest true "Car object"
 // @Success     200 {array} models.Car
 // @Failure     500 {object} ErrorResponse
 // @Router      /cars/{id} [put]
 func (h *CarHandler) UpdateCar(c *gin.Context) {
 	id := c.Param("id")
 
-	var req models.Car
-	if err := c.ShouldBindJSON(&req); err != nil {
+	// Get existing car first
+	existingCar, err := h.carService.GetCarByID(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "car not found"})
+		return
+	}
+
+	// Bind the request body to update only provided fields
+	if err := c.ShouldBindJSON(&existingCar); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	car, err := h.carService.UpdateCar(c.Request.Context(), id, req)
+	// Update the car with merged data
+	updatedCar, err := h.carService.UpdateCar(c.Request.Context(), id, existingCar)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, car)
+	c.JSON(http.StatusOK, updatedCar)
 }
 
 // @Summary     Delete a car
