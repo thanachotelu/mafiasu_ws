@@ -23,12 +23,45 @@
       </div>
     </div>
 
-    <Services />
+    <Services :serviceList="chaufferurRentCar" />
   </div>
 </template>
 
 <script setup>
 import Services from '../components/Services.vue';
+
+const chaufferurRentCar = [
+  {
+    brand: 'Honda',
+    model: 'City 1.0 Turbo (RS)',
+    rentalPricePerDay: 0,
+    seat: 5,
+    doors: 4,
+    gearType: 'อัตโนมัติ',
+    fuelType: 'เบนซิน',
+    image: '/src/assets/images/City 1.0 Turbo (RS).png'
+  },
+  {
+    brand: 'Hyundai',
+    model: 'New H1 รุ่น Elite เสริมประตูไฟฟ้า',
+    rentalPricePerDay: 0,
+    seat: 7,
+    doors: 5,
+    gearType: 'อัตโนมัติ',
+    fuelType: 'ดีเซล',
+    image: '/src/assets/images/New H1 รุ่น Elite เสริมประตูไฟฟ้า.png'
+  },
+  {
+    brand: 'Toyota',
+    model: 'Yaris',
+    rentalPricePerDay: 0,
+    seat: 5,
+    doors: 4,
+    gearType: 'อัตโนมัติ',
+    fuelType: 'เบนซิน',
+    image: '/src/assets/images/Yaris.png'
+  }
+];
 </script>
 
 <style scoped>
