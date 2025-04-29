@@ -33,7 +33,7 @@ func (r *userRepository) GetUserByID(ctx context.Context, id string) (models.Use
 }
 
 func (r *userRepository) GetAllUsers(ctx context.Context) ([]models.User, error) {
-	rows, err := r.db.Query(ctx, `SELECT user_id, username, password_hash, firstname, lastname, phonenumber, email, role, status FROM users`)
+	rows, err := r.db.Query(ctx, `SELECT user_id, username, firstname, lastname, email, status FROM users`)
 	if err != nil {
 		return nil, err
 	}

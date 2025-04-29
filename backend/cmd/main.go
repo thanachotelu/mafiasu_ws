@@ -8,10 +8,15 @@ import (
 
 	"mafiasu_ws/config"
 	"mafiasu_ws/database"
-	"mafiasu_ws/internal/handler"
-	"mafiasu_ws/internal/repository"
-	"mafiasu_ws/internal/routes"
-	"mafiasu_ws/internal/service"
+
+	extRepo "mafiasu_ws/external/repository"
+	extRoutes "mafiasu_ws/external/routes"
+	extService "mafiasu_ws/external/services"
+
+	intHandler "mafiasu_ws/internal/handler"
+	intRepo "mafiasu_ws/internal/repository"
+	intRoutes "mafiasu_ws/internal/routes"
+	intService "mafiasu_ws/internal/service"
 )
 
 func main() {
@@ -26,28 +31,34 @@ func main() {
 	}
 	defer db.Close()
 
-	//User
-	userRepo := repository.NewUserRepository(db.GetPool())
-	userService := service.NewUserService(userRepo)
-	userHandler := handler.NewUserHandler(userService)
+	// User
+	userRepo := intRepo.NewUserRepository(db.GetPool())
+	userService := intService.NewUserService(userRepo)
+	userHandler := intHandler.NewUserHandler(userService)
 
-	//Car
-	carRepo := repository.NewCarRepository(db.GetPool())
-	carService := service.NewCarService(carRepo)
-	carHandler := handler.NewCarHandler(carService)
+	// Car
+	carRepo := intRepo.NewCarRepository(db.GetPool())
+	carService := intService.NewCarService(carRepo)
+	carHandler := intHandler.NewCarHandler(carService)
 
-	//Booking
-	bookingRepo := repository.NewBookingRepository(db.GetPool())
-	bookingService := service.NewBookingService(bookingRepo)
-	bookingHandler := handler.NewBookingHandler(bookingService)
+	// Booking
+	bookingRepo := intRepo.NewBookingRepository(db.GetPool())
+	bookingService := intService.NewBookingService(bookingRepo)
+	bookingHandler := intHandler.NewBookingHandler(bookingService)
+
+	// Affiliates
+	affiliateRepo := extRepo.NewAffiliateRepository(db.GetPool())
+	affiliateService := extService.NewAffiliateService(affiliateRepo)
 
 	r := gin.Default()
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "healthy"})
 	})
-	routes.RegisterUserRoutes(r, userHandler)
-	routes.RegisterCarRoutes(r, carHandler)
-	routes.RegisterBookingRoutes(r, bookingHandler)
+	// Register routes
+	intRoutes.RegisterUserRoutes(r, userHandler)
+	intRoutes.RegisterCarRoutes(r, carHandler)
+	intRoutes.RegisterBookingRoutes(r, bookingHandler)
+	extRoutes.RegisterAffiliateRoutes(r, affiliateService)
 
 	if err := r.Run(":8000"); err != nil {
 		log.Fatalf("failed to start server: %v", err)

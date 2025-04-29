@@ -1,6 +1,7 @@
 create EXTENSION if not exists "uuid-ossp";
 create type user_status as enum ('active','inactive','banned','pending');
 create type car_status as enum ('active','inactive');
+create type booking_status as enum ('confirmed','unconfirmed');
 
 create table users (
     user_id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -45,14 +46,27 @@ create table cars (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp
 );
 
-create table booking (
+CREATE TABLE trackclicks (
+    session_id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    car_id uuid REFERENCES cars (car_id) NOT NULL,
+    affiliator_id uuid REFERENCES affiliator (affiliator_id) NOT NULL,
+    referral_link TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT current_timestamp,
+    updated_at TIMESTAMPTZ DEFAULT current_timestamp
+);
+
+CREATE TABLE booking (
     book_id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id uuid REFERENCES users (user_id) NOT NULL ,
+    session_id uuid REFERENCES trackclicks (session_id),
+    user_id uuid REFERENCES users (user_id) NOT NULL,
     car_id uuid REFERENCES cars (car_id) NOT NULL,
     affiliator_id uuid REFERENCES affiliator (affiliator_id),
     total_price DECIMAL(10, 2) NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp
+    pickup_date DATE,
+    return_date DATE,
+    status booking_status DEFAULT 'unconfirmed',
+    created_at TIMESTAMPTZ DEFAULT current_timestamp,
+    updated_at TIMESTAMPTZ DEFAULT current_timestamp
 );
 
 CREATE TABLE clients (
@@ -154,3 +168,9 @@ insert into carimages (car_id, image_path) values
 ((select car_id from cars where model = 'Revo' and license_plate = '9ณว 2157' limit 1),'assets/images/Revo.png'),
 ((select car_id from cars where model = 'D-Max' and license_plate = '3ณจ 5097' limit 1),'assets/images/D-Max.png'),
 ((select car_id from cars where model = 'Ranger' and license_plate = '7ขบ 1482' limit 1),'assets/images/Ranger.png');
+
+insert into affiliator (user_id,affiliate_code,referral_link,commission_rate,total_commission,balance,created_at,updated_at) values
+((select user_id from users where username = 'saturn'),'ABC1234','example@test.com',5,20000,20000,NOW(),NOW());
+
+insert into booking (user_id,car_id,total_price,pickup_date,return_date,created_at,updated_at) values
+((select user_id from users where username = 'saturn'),(select car_id from cars where model = 'Staria'),2500,'2025-05-01','2025-05-03',NOW(),NOW());
