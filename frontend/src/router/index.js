@@ -5,6 +5,7 @@ import AffiliatorForm from '../pages/AffiliatorForm.vue';
 import CarLists from '../pages/CarLists.vue';
 import Dashboard from '../pages/Dashboard.vue';
 import CarDetail from '../pages/CarDetail.vue';
+import APIList from '../pages/ApiLists.vue';
 
 import ShortRent from '../pages/ShortRent.vue';
 import LongRent from '../pages/LongRent.vue';
@@ -62,7 +63,12 @@ const routes = [
     path: '/dashboard',
     name: 'Dashboard',
     component: Dashboard,
-  }
+  },
+  {
+    path: '/api-lists',
+    name: 'APIs Documentation',
+    component: APIList,
+  },
 ];
 
 const router = createRouter({

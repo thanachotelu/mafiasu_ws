@@ -1,0 +1,9 @@
+basePath: /api/v1
+host: localhost:8000
+info:
+  contact: {}
+  description: API Server for MafiaCar Application
+  title: MafiaCar API
+  version: "1.0"
+paths: {}
+swagger: "2.0"

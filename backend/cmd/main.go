@@ -5,14 +5,23 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"mafiasu_ws/config"
 	"mafiasu_ws/database"
+	_ "mafiasu_ws/docs" // This will be generated
 	"mafiasu_ws/internal/handler"
 	"mafiasu_ws/internal/repository"
 	"mafiasu_ws/internal/routes"
 	"mafiasu_ws/internal/service"
 )
+
+// @title          MafiaCar API
+// @version        1.0
+// @description    APIs for MafiaCar affiliate user program
+// @host          localhost:8000
+// @BasePath      /api/v1
 
 func main() {
 	cfg, err := config.New()
@@ -42,6 +51,21 @@ func main() {
 	bookingHandler := handler.NewBookingHandler(bookingService)
 
 	r := gin.Default()
+
+	// Enable CORS (if needed)
+	// r.Use(func(c *gin.Context) {
+	// 	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+	// 	c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+	// 	c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+	// 	if c.Request.Method == "OPTIONS" {
+	// 		c.AbortWithStatus(204)
+	// 		return
+	// 	}
+	// 	c.Next()
+	// })
+
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "healthy"})
 	})

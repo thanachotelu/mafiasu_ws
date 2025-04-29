@@ -10,12 +10,13 @@
       </template>
 
       <RouterLink to="/car-lists" class="nav-link">Car Listing</RouterLink>
-
+      
       <template v-if="!isLoggedIn">
         <RouterLink to="/login-affiliator" class="nav-link">Login As Affiliator</RouterLink>
       </template>
       
       <template v-else>
+        <RouterLink to="/api-lists" class="nav-link">APIs Documentation</RouterLink>
         <RouterLink to="/dashboard" class="nav-link">Dashboard</RouterLink>
         <a href="#" @click.prevent="handleLogout" class="nav-link">Logout</a>
       </template>
