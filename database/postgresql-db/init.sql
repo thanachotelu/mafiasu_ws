@@ -76,6 +76,12 @@ CREATE TABLE data (
     content TEXT NOT NULL
 );
 
+CREATE TABLE carimages (
+    car_id uuid,
+    image_path text,
+    foreign key (car_id) REFERENCES cars(car_id)
+);
+
 INSERT INTO users (username, password_hash, firstname, lastname, phonenumber, email, role, status)
 VALUES
 (
@@ -110,7 +116,7 @@ INSERT INTO cars (brand, model, license_plate, cartype, seat, doors, geartype, f
 ('Toyota', 'Camry', '7ขท 8317', 'รถเก๋ง', 5, 4, 'อัตโนมัติ', 'เบนซิน', 1780.00, 'active', NOW(), NOW()),
 ('Honda', 'Accord', '2ณฟ 7921', 'รถเก๋ง', 5, 4, 'อัตโนมัติ', 'เบนซิน', 2200.00, 'active', NOW(), NOW()),
 ('Toyota', 'New Hybrid Camry', '9ดน 3106', 'รถเก๋ง', 5, 4, 'อัตโนมัติ', 'เบนซิน', 2180.00, 'active', NOW(), NOW()),
-('Honda', 'Accord 1.5 TURBO', '6นย 5045', 'Sedan', 5, 4, 'อัตโนมัติ', 'เบนซิน', 1850.00, 'active', NOW(), NOW()),
+('Honda', 'Accord 1.5 TURBO', '6นย 5045', 'รถเก๋ง', 5, 4, 'อัตโนมัติ', 'เบนซิน', 1850.00, 'active', NOW(), NOW()),
 ('Isuzu', 'D-Max Cab4 1.9AT', '8พค 1698', 'กระบะ 4 ประตู', 5, 4, 'อัตโนมัติ CVT', 'ดีเซล', 1690.00, 'active', NOW(), NOW()),
 ('Mitsubishi', 'Xpander All New (2024)', '8ปพ 2874', 'เอนกประสงค์ MPV', 7, 5, 'อัตโนมัติ CVT', 'เบนซิน', 1590.00, 'active', NOW(), NOW()),
 ('Isuzu', 'All New Mu-X', '3บว 1360', 'SUV', 7, 5, 'อัตโนมัติ 6 สปีด', 'ดีเซล', 2300.00, 'active', NOW(), NOW()),
@@ -123,3 +129,28 @@ INSERT INTO cars (brand, model, license_plate, cartype, seat, doors, geartype, f
 ('Toyota', 'Revo', '9ณว 2157', 'กระบะ 4 ประตู', 5, 4, 'อัตโนมัติ CVT', 'ดีเซล', 1200.00, 'active', NOW(), NOW()),
 ('Isuzu', 'D-Max', '3ณจ 5097', 'กระบะ 4 ประตู', 5, 4, 'อัตโนมัติ CVT', 'ดีเซล', 1250.00, 'active', NOW(), NOW()),
 ('Ford', 'Ranger', '7ขบ 1482', 'กระบะ 4 ประตู', 5, 4, 'อัตโนมัติ CVT', 'ดีเซล', 1100.00, 'active', NOW(), NOW());
+
+insert into carimages (car_id, image_path) values 
+((select car_id from cars where model = 'Hiace' and license_plate = '1 กย 5012' limit 1),'assets/images/Hiace.png'),
+((select car_id from cars where model = 'Commuter' and license_plate = '2กข 4821' limit 1),'assets/images/Commuter.png'),
+((select car_id from cars where model = 'Staria' and license_plate = '4ขจ 1739' limit 1),'assets/images/Staria.png'),
+((select car_id from cars where model = 'New H1 รุ่น Elite เสริมประตูไฟฟ้า' and license_plate = '5งบ 9273' limit 1),'assets/images/New H1 รุ่น Elite เสริมประตูไฟฟ้า.png'),
+((select car_id from cars where model = 'Fortuner' and license_plate = '1 กย 5012' limit 1),'assets/images/Fortuner.png'),
+((select car_id from cars where model = 'Sienta' and license_plate = '3คด 0152' limit 1),'assets/images/Sienta.png'),
+((select car_id from cars where model = 'Avanza' and license_plate = '1จร 6048' limit 1),'assets/images/Avanza.png'),
+((select car_id from cars where model = 'Camry' and license_plate = '7ขท 8317' limit 1),'assets/images/Camry.png'),
+((select car_id from cars where model = 'Accord' and license_plate = '2ณฟ 7921' limit 1),'assets/images/Accord.png'),
+((select car_id from cars where model = 'New Hybrid Camry' and license_plate = '9ดน 3106' limit 1),'assets/images/New Hybrid Camry.png'),
+((select car_id from cars where model = 'Accord 1.5 TURBO' and license_plate = '6นย 5045' limit 1),'assets/images/Accord 1.5 TURBO.png'),
+((select car_id from cars where model = 'D-Max Cab4 1.9AT' and license_plate = '8พค 1698' limit 1),'assets/images/D-Max Cab4 1.9AT.png'),
+((select car_id from cars where model = 'Xpander All New (2024)' and license_plate = '8ปพ 2874' limit 1),'assets/images/Xpander All New.png'),
+((select car_id from cars where model = 'All New Mu-X' and license_plate = '3บว 1360' limit 1),'assets/images/All New Mu-X.png'),
+((select car_id from cars where model = 'City 1.0 Turbo (RS)' and license_plate = 'ศน 2483' limit 1),'assets/images/City 1.0 Turbo (RS).png'),
+((select car_id from cars where model = 'City 1.0 Turbo (RS)' and license_plate = '5พษ 9185' limit 1),'assets/images/City 1.0 Turbo (RS).png'),
+((select car_id from cars where model = 'New H1 รุ่น Elite เสริมประตูไฟฟ้า' and license_plate = '7สข 4871'  limit 1),'assets/images/New H1 รุ่น Elite เสริมประตูไฟฟ้า.png'),
+((select car_id from cars where model = 'Yaris' and license_plate = 'ภค 7012' limit 1),'assets/images/Yaris.png'),
+((select car_id from cars where model = 'Vios' and license_plate = 'มช 5239' limit 1),'assets/images/Vios.png'),
+((select car_id from cars where model = 'Altis' and license_plate = '8กฟ 6524' limit 1),'assets/images/Altis.png'),
+((select car_id from cars where model = 'Revo' and license_plate = '9ณว 2157' limit 1),'assets/images/Revo.png'),
+((select car_id from cars where model = 'D-Max' and license_plate = '3ณจ 5097' limit 1),'assets/images/D-Max.png'),
+((select car_id from cars where model = 'Ranger' and license_plate = '7ขบ 1482' limit 1),'assets/images/Ranger.png');
