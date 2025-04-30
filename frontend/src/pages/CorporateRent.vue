@@ -23,12 +23,45 @@
       </div>
     </div>
 
-    <Services />
+    <Services :serviceList="corporateRentCar" />
   </div>
 </template>
 
 <script setup>
 import Services from '../components/Services.vue';
+
+const corporateRentCar = [
+{
+    brand: 'Isuzu',
+    model: 'D-Max Cab4 1.9AT',
+    rentalPricePerDay: 0,
+    seat: 5,
+    doors: 4,
+    gearType: 'อัตโนมัติ CVT',
+    fuelType: 'ดีเซล',
+    image: '/src/assets/images/D-Max Cab4 1.9AT.png'
+  },
+  {
+    brand: 'Toyota',
+    model: 'Altis',
+    rentalPricePerDay: 0,
+    seat: 5,
+    doors: 4,
+    gearType: 'อัตโนมัติ',
+    fuelType: '',
+    image: '/src/assets/images/Altis.png'
+  },
+  {
+    brand: 'Toyota',
+    model: 'Commuter',
+    rentalPricePerDay: 2180,
+    seat: 12,
+    doors: 4,
+    gearType: 'อัตโนมัติ',
+    fuelType: 'เบนซิน',
+    image: '/src/assets/images/Commuter.png'
+  }
+];
 </script>
 
 <style scoped>

@@ -27,12 +27,45 @@
       </div>
     </div>
 
-    <Services />
+    <Services :serviceList="shortRentCars" />
   </div>
 </template>
 
 <script setup>
 import Services from '../components/Services.vue';
+
+const shortRentCars = [
+  {
+    brand: 'Toyota',
+    model: 'Hiace',
+    rentalPricePerDay: 2080.00,
+    seat: 12,
+    doors: 4,
+    gearType: 'อัตโนมัติ',
+    fuelType: 'เบนซิน',
+    image: '/src/assets/images/Hiace.png'
+  },
+  {
+    brand: 'Hyundai',
+    model: 'Staria',
+    rentalPricePerDay: 3180.00,
+    seat: 11,
+    doors: 4,
+    gearType: 'อัตโนมัติ',
+    fuelType: 'เบนซิน',
+    image: '/src/assets/images/Staria.png'
+  },
+  {
+    brand: 'Toyota',
+    model: 'Sienta',
+    rentalPricePerDay: 1320.00,
+    seat: 7,
+    doors: 4,
+    gearType: 'อัตโนมัติ',
+    fuelType: 'เบนซิน',
+    image: '/src/assets/images/Sienta.png'
+  }
+];
 </script>
 
 <style scoped>
