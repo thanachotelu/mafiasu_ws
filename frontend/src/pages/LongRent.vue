@@ -34,32 +34,32 @@ const longRentCars = [
 {
     brand: 'Isuzu',
     model: 'All New Mu-X',
-    rentalPricePerDay: 0,
+    rentalPricePerDay: 2300.00,
     seat: 7,
     doors: 5,
     gearType: 'อัตโนมัติ 6 สปีด',
     fuelType: 'ดีเซล',
-    image: '/src/assets/images/All New Mu-X.png'
+    image: '/src/assets/images/cars/All New Mu-X.png'
   },
   {
     brand: 'Isuzu',
     model: 'D-Max Cab4 1.9AT',
-    rentalPricePerDay: 0,
+    rentalPricePerDay: 1250.00,
     seat: 5,
     doors: 4,
     gearType: 'อัตโนมัติ CVT',
     fuelType: 'ดีเซล',
-    image: '/src/assets/images/D-Max Cab4 1.9AT.png'
+    image: '/src/assets/images/cars/D-Max Cab4 1.9AT.png'
   },
   {
     brand: 'Toyota',
     model: 'Hiace',
-    rentalPricePerDay: 0,
+    rentalPricePerDay: 2080.00,
     seat: 12,
     doors: 4,
     gearType: 'อัตโนมัติ',
     fuelType: 'เบนซิน',
-    image: '/src/assets/images/Hiace.png'
+    image: '/src/assets/images/cars/Hiace.png'
   }
 ];
 </script>

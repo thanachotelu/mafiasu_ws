@@ -34,22 +34,22 @@ const corporateRentCar = [
 {
     brand: 'Isuzu',
     model: 'D-Max Cab4 1.9AT',
-    rentalPricePerDay: 0,
+    rentalPricePerDay: 1690.00,
     seat: 5,
     doors: 4,
     gearType: 'อัตโนมัติ CVT',
     fuelType: 'ดีเซล',
-    image: '/src/assets/images/D-Max Cab4 1.9AT.png'
+    image: '/src/assets/images/cars/D-Max Cab4 1.9AT.png'
   },
   {
     brand: 'Toyota',
     model: 'Altis',
-    rentalPricePerDay: 0,
+    rentalPricePerDay: 1200.00,
     seat: 5,
     doors: 4,
     gearType: 'อัตโนมัติ',
     fuelType: '',
-    image: '/src/assets/images/Altis.png'
+    image: '/src/assets/images/cars/Altis.png'
   },
   {
     brand: 'Toyota',
@@ -59,7 +59,7 @@ const corporateRentCar = [
     doors: 4,
     gearType: 'อัตโนมัติ',
     fuelType: 'เบนซิน',
-    image: '/src/assets/images/Commuter.png'
+    image: '/src/assets/images/cars/Commuter.png'
   }
 ];
 </script>

@@ -34,32 +34,32 @@ const chaufferurRentCar = [
   {
     brand: 'Honda',
     model: 'City 1.0 Turbo (RS)',
-    rentalPricePerDay: 0,
+    rentalPricePerDay: 1390.00,
     seat: 5,
     doors: 4,
     gearType: 'อัตโนมัติ',
     fuelType: 'เบนซิน',
-    image: '/src/assets/images/City 1.0 Turbo (RS).png'
+    image: '/src/assets/images/cars/City 1.0 Turbo (RS).png'
   },
   {
     brand: 'Hyundai',
     model: 'New H1 รุ่น Elite เสริมประตูไฟฟ้า',
-    rentalPricePerDay: 0,
+    rentalPricePerDay: 2500.00,
     seat: 7,
     doors: 5,
     gearType: 'อัตโนมัติ',
     fuelType: 'ดีเซล',
-    image: '/src/assets/images/New H1 รุ่น Elite เสริมประตูไฟฟ้า.png'
+    image: '/src/assets/images/cars/New H1 รุ่น Elite เสริมประตูไฟฟ้า.png'
   },
   {
     brand: 'Toyota',
     model: 'Yaris',
-    rentalPricePerDay: 0,
+    rentalPricePerDay: 780.00,
     seat: 5,
     doors: 4,
     gearType: 'อัตโนมัติ',
     fuelType: 'เบนซิน',
-    image: '/src/assets/images/Yaris.png'
+    image: '/src/assets/images/cars/Yaris.png'
   }
 ];
 </script>

@@ -43,7 +43,7 @@ const shortRentCars = [
     doors: 4,
     gearType: 'อัตโนมัติ',
     fuelType: 'เบนซิน',
-    image: '/src/assets/images/Hiace.png'
+    image: '/src/assets/images/cars/Hiace.png'
   },
   {
     brand: 'Hyundai',
@@ -53,7 +53,7 @@ const shortRentCars = [
     doors: 4,
     gearType: 'อัตโนมัติ',
     fuelType: 'เบนซิน',
-    image: '/src/assets/images/Staria.png'
+    image: '/src/assets/images/cars/Staria.png'
   },
   {
     brand: 'Toyota',
@@ -63,7 +63,7 @@ const shortRentCars = [
     doors: 4,
     gearType: 'อัตโนมัติ',
     fuelType: 'เบนซิน',
-    image: '/src/assets/images/Sienta.png'
+    image: '/src/assets/images/cars/Sienta.png'
   }
 ];
 </script>
