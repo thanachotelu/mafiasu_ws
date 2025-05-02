@@ -1,62 +1,107 @@
 package service
 
 import (
+    "golang.org/x/crypto/bcrypt"
+    "log"
     "context"
-  //  "fmt"
-   // "mafiasu_ws/external/keycloak"
-    "mafiasu_ws/internal/interfaces"
-    "mafiasu_ws/internal/models"
+    "fmt"
+    extInterfaces "mafiasu_ws/external/interfaces" // ตั้งชื่อ Alias ให้ external/interfaces
+    intInterfaces "mafiasu_ws/internal/interfaces" // ตั้งชื่อ Alias ให้ internal/interfaces
+    intModels  "mafiasu_ws/internal/models"
+    exModels  "mafiasu_ws/external/models"
 )
 
 // userService implements business logic around users
 type userService struct {
-    repo            interfaces.UserRepository
-    keycloakService interfaces.KeycloakService
+    repo            intInterfaces.UserRepository
+    keycloakService extInterfaces.KeycloakService
 }
 
 // NewUserService constructs a new UserService
-//func NewUserService(repo interfaces.UserRepository, keycloakService interfaces.KeycloakService) interfaces.UserService {
-   // return &userService{repo: repo, keycloakService: keycloakService}
-//}
+func NewUserService(repo intInterfaces.UserRepository, keycloakService  extInterfaces.KeycloakService) intInterfaces.UserService {
+   return &userService{repo: repo, keycloakService: keycloakService}
+}
 
 // GetUserByID retrieves a user by its ID
-func (s *userService) GetUserByID(ctx context.Context, id string) (models.User, error) {
+func (s *userService) GetUserByID(ctx context.Context, id string) (intModels.User, error) {
     return s.repo.GetUserByID(ctx, id)
 }
 
-// RegisterUser registers a new user in Postgres and Keycloak
-//func (s *userService) RegisterUser(ctx context.Context, user *models.User) error {
-    // 1) บันทึกลง Postgres ก่อน
-   // if err := s.repo.AddUser(ctx, user); err != nil {
-    //    return fmt.Errorf("db add user: %w", err)
-  //  }
+func (s *userService) GetAllUsers(ctx context.Context) ([]intModels.User, error) {
+	return s.repo.GetAllUsers(ctx)
+}
 
-    // 2) สร้าง user ใน Keycloak (รับแค่ error)
-  //  err := s.keycloakService.CreateUser(ctx, keycloak.CreateUserRequest{
-    //    Username:  user.Username,
-    //    Email:     user.Email,
-     //   FirstName: user.Firstname,
-    //    LastName:  user.Lastname,
-     //   Credentials: []keycloak.Credential{
-          //  {
-          //      Type:     "password",
-           //     Value:    user.RawPassword,
-           //     Temporary: false,
-         //   },
-      //  },
-  //  })
-   // if err != nil {
-   //     return fmt.Errorf("keycloak create user: %w", err)
-   // }
+func (s *userService) AddUser(ctx context.Context, user intModels.CreateUserRequest) (intModels.User, error) {
+    log.Println("Starting AddUser process...")
 
-    // 3) Assign role "user" ให้กับ user ที่เพิ่งสร้าง (ใช้ user.UserID)
-   // if err := s.keycloakService.AssignRole(ctx, user.UserID, "user"); err != nil {
-   //     return fmt.Errorf("assign role failed: %w", err)
-   // }
+    // ตรวจสอบ Role ที่ส่งมาจาก Client
+    validRoles := map[string]bool{
+        "user":  true,
+        "admin": true,
+        "editor": true,
+    }
 
-   // return nil
-//}
+    if !validRoles[user.Role] {
+        return intModels.User{}, fmt.Errorf("invalid role: %s", user.Role)
+    }
 
+    // Log ข้อมูลที่กำลังจะส่งไปยัง Keycloak
+    log.Printf("Sending to Keycloak: Username=%s, Email=%s, FirstName=%s, LastName=%s, Role=%s", 
+        user.Username, user.Email, user.Firstname, user.Lastname, user.Role)
 
+    // สร้างผู้ใช้ใน Keycloak
+    userID, err := s.keycloakService.CreateUser(ctx, exModels.CreateUserRequest{
+        Username:  user.Username,
+        Email:     user.Email,
+        FirstName: user.Firstname,
+        LastName:  user.Lastname,
+        Enabled:   true,
+        Credentials: []exModels.Credential{
+            {
+                Type:      "password",
+                Value:     user.Password,
+                Temporary: false,
+            },
+        },
+    })
+    if err != nil {
+        log.Printf("Error creating user in Keycloak: %v", err)
+        return intModels.User{}, fmt.Errorf("failed to create user in Keycloak: %w", err)
+    }
 
+    log.Printf("User created in Keycloak with ID: %s", userID)
 
+    // แฮชรหัสผ่านก่อนเก็บในฐานข้อมูล
+    log.Println("Hashing password...")
+    hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+    if err != nil {
+        log.Printf("Error hashing password: %v", err)
+        return intModels.User{}, fmt.Errorf("failed to hash password: %w", err)
+    }
+    user.Password = string(hashedPassword)
+
+    // เพิ่มผู้ใช้ในฐานข้อมูล
+    log.Println("Adding user to database...")
+    userInDB, err := s.repo.AddUser(ctx, user)
+    if err != nil {
+        log.Printf("Error adding user to database: %v", err)
+        return intModels.User{}, fmt.Errorf("failed to add user in database: %w", err)
+    }
+
+    log.Printf("User added to database: %+v", userInDB)
+
+    // Assign Role ให้ผู้ใช้ใน Keycloak
+    if err := s.keycloakService.AssignRole(ctx, userID, user.Role); err != nil {
+        return intModels.User{}, fmt.Errorf("failed to assign role in Keycloak: %w", err)
+    }
+
+    return userInDB, nil
+}
+
+func (s *userService) UpdateUser(ctx context.Context, id string, user intModels.User) (intModels.User, error) {
+	return s.repo.UpdateUser(ctx, id, user)
+}
+
+func (s *userService) DeleteUser(ctx context.Context, id string) (intModels.User, error) {
+	return s.repo.DeleteUser(ctx, id)
+}
