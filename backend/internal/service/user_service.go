@@ -105,3 +105,19 @@ func (s *userService) UpdateUser(ctx context.Context, id string, user intModels.
 func (s *userService) DeleteUser(ctx context.Context, id string) (intModels.User, error) {
 	return s.repo.DeleteUser(ctx, id)
 }
+
+func (s *userService) GetAllUsers(ctx context.Context) ([]models.User, error) {
+	return s.repo.GetAllUsers(ctx)
+}
+
+func (s *userService) AddUser(ctx context.Context, user models.CreateUserRequest) (models.User, error) {
+	return s.repo.AddUser(ctx, user)
+}
+
+func (s *userService) UpdateUser(ctx context.Context, id string, user models.User) (models.User, error) {
+	return s.repo.UpdateUser(ctx, id, user)
+}
+
+func (s *userService) DeleteUser(ctx context.Context, id string) (models.User, error) {
+	return s.repo.DeleteUser(ctx, id)
+}

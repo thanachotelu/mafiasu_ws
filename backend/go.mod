@@ -1,13 +1,10 @@
 module mafiasu_ws
 
-go 1.23.0
-
-toolchain go1.23.1
+go 1.22.5
 
 require (
 	github.com/gin-gonic/gin v1.10.0
-	github.com/golang-jwt/jwt/v4 v4.5.2
-	github.com/jackc/pgx/v4 v4.12.1-0.20210724153913-640aa07df17c
+	github.com/jackc/pgx/v4 v4.18.3
 	github.com/spf13/viper v1.20.1
 )
 
