@@ -31,16 +31,6 @@
               </div>
 
               <div class="form-group">
-                <label>Address</label>
-                <input type="text" placeholder="Street Address">
-                <div class="address-fields">
-                  <input type="text" placeholder="City">
-                  <input type="text" placeholder="State / Province">
-                </div>
-                <input type="text" placeholder="Postal / Zip Code">
-              </div>
-
-              <div class="form-group">
                 <label>Phone number</label>
                 <input type="tel">
               </div>
@@ -84,7 +74,8 @@
 
 .form-container {
   width: 100%;
-  min-height: 100vh;
+  /* min-height: 100vh; */
+  height: fit-content;
   margin: 0;
   padding: 40px 0;
   display: flex;
