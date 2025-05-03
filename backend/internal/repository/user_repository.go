@@ -38,7 +38,7 @@ func (r *userRepository) GetUserByID(ctx context.Context, id string) (models.Use
 		&user.Email,
 		&user.Status,
 	)
-	err := r.db.QueryRow(ctx, `
+	err = r.db.QueryRow(ctx, `
 	SELECT user_id, username, firstname, lastname, email, status
 	FROM users WHERE user_id = $1
 `, id).Scan(

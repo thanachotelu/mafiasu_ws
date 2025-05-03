@@ -1,11 +1,15 @@
 module mafiasu_ws
 
-go 1.22.5
+go 1.23.0
+
+toolchain go1.23.1
 
 require (
 	github.com/gin-gonic/gin v1.10.0
+	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/jackc/pgx/v4 v4.18.3
 	github.com/spf13/viper v1.20.1
+	golang.org/x/crypto v0.37.0
 )
 
 require (
@@ -47,7 +51,6 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/arch v0.16.0 // indirect
-	golang.org/x/crypto v0.37.0 // indirect
 	golang.org/x/net v0.39.0 // indirect
 	golang.org/x/sys v0.32.0 // indirect
 	golang.org/x/text v0.24.0 // indirect

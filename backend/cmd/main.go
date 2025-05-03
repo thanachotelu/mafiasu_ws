@@ -12,7 +12,7 @@ import (
 	extRepo "mafiasu_ws/external/repository"
 	extRoutes "mafiasu_ws/external/routes"
 	extService "mafiasu_ws/external/services"
-
+	extInterfaces "mafiasu_ws/external/interfaces"
 	intHandler "mafiasu_ws/internal/handler"
 	intRepo "mafiasu_ws/internal/repository"
 	intRoutes "mafiasu_ws/internal/routes"
@@ -27,7 +27,6 @@ func main() {
 	}
 
 	db, err := database.NewPostgresDB(cfg)
-	db, err := database.NewPostgresDB(cfg)
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
 	}
@@ -38,26 +37,6 @@ func main() {
 	kc := extService.NewKeycloakService(cfg.Keycloak)
 	userService := intService.NewUserService(userRepo,kc)
 	userHandler := intHandler.NewUserHandler(userService)
-	defer db.Close()
-
-	// User
-	userRepo := intRepo.NewUserRepository(db.GetPool())
-	userService := intService.NewUserService(userRepo)
-	userHandler := intHandler.NewUserHandler(userService)
-
-	// Car
-	carRepo := intRepo.NewCarRepository(db.GetPool())
-	carService := intService.NewCarService(carRepo)
-	carHandler := intHandler.NewCarHandler(carService)
-
-	// Booking
-	bookingRepo := intRepo.NewBookingRepository(db.GetPool())
-	bookingService := intService.NewBookingService(bookingRepo)
-	bookingHandler := intHandler.NewBookingHandler(bookingService)
-
-	// Affiliates
-	affiliateRepo := extRepo.NewAffiliateRepository(db.GetPool())
-	affiliateService := extService.NewAffiliateService(affiliateRepo)
 
 	// Car
 	carRepo := intRepo.NewCarRepository(db.GetPool())
