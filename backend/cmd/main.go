@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -10,11 +11,15 @@ import (
 
 	"mafiasu_ws/config"
 	"mafiasu_ws/database"
-	_ "mafiasu_ws/docs" // This will be generated
-	"mafiasu_ws/internal/handler"
-	"mafiasu_ws/internal/repository"
-	"mafiasu_ws/internal/routes"
-	"mafiasu_ws/internal/service"
+
+	extInterfaces "mafiasu_ws/external/interfaces"
+	extRepo "mafiasu_ws/external/repository"
+	extRoutes "mafiasu_ws/external/routes"
+	extService "mafiasu_ws/external/services"
+	intHandler "mafiasu_ws/internal/handler"
+	intRepo "mafiasu_ws/internal/repository"
+	intRoutes "mafiasu_ws/internal/routes"
+	intService "mafiasu_ws/internal/service"
 )
 
 // @title          MafiaCar API
@@ -24,6 +29,7 @@ import (
 // @BasePath      /api/v1
 
 func main() {
+	// โหลด configuration
 	cfg, err := config.New()
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
@@ -35,21 +41,27 @@ func main() {
 	}
 	defer db.Close()
 
-	//User
-	userRepo := repository.NewUserRepository(db.GetPool())
-	userService := service.NewUserService(userRepo)
-	userHandler := handler.NewUserHandler(userService)
+	// User
+	userRepo := intRepo.NewUserRepository(db.GetPool())
+	kc := extService.NewKeycloakService(cfg.Keycloak)
+	userService := intService.NewUserService(userRepo, kc)
+	userHandler := intHandler.NewUserHandler(userService)
 
-	//Car
-	carRepo := repository.NewCarRepository(db.GetPool())
-	carService := service.NewCarService(carRepo)
-	carHandler := handler.NewCarHandler(carService)
+	// Car
+	carRepo := intRepo.NewCarRepository(db.GetPool())
+	carService := intService.NewCarService(carRepo)
+	carHandler := intHandler.NewCarHandler(carService)
 
-	//Booking
-	bookingRepo := repository.NewBookingRepository(db.GetPool())
-	bookingService := service.NewBookingService(bookingRepo)
-	bookingHandler := handler.NewBookingHandler(bookingService)
+	// Booking
+	bookingRepo := intRepo.NewBookingRepository(db.GetPool())
+	bookingService := intService.NewBookingService(bookingRepo)
+	bookingHandler := intHandler.NewBookingHandler(bookingService)
 
+	// Affiliates
+	affiliateRepo := extRepo.NewAffiliateRepository(db.GetPool())
+	affiliateService := extService.NewAffiliateService(affiliateRepo)
+	waitForKeycloak(cfg.Keycloak.BaseURL)
+	initializeRoles(kc)
 	r := gin.Default()
 
 	// Enable CORS (if needed)
@@ -69,11 +81,32 @@ func main() {
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "healthy"})
 	})
-	routes.RegisterUserRoutes(r, userHandler)
-	routes.RegisterCarRoutes(r, carHandler)
-	routes.RegisterBookingRoutes(r, bookingHandler)
+	// Register routes
+	intRoutes.RegisterUserRoutes(r, userHandler)
+	intRoutes.RegisterCarRoutes(r, carHandler)
+	intRoutes.RegisterBookingRoutes(r, bookingHandler)
+	extRoutes.RegisterAffiliateRoutes(r, affiliateService)
 
 	if err := r.Run(":8000"); err != nil {
 		log.Fatalf("failed to start server: %v", err)
+	}
+}
+func initializeRoles(keycloakService extInterfaces.KeycloakService) {
+	roles := []string{"user", "Affiliator"} // รายชื่อ Role ที่ต้องการสร้าง
+	for _, role := range roles {
+		if err := keycloakService.CreateRoleIfNotExists(role); err != nil {
+			log.Printf("Failed to create role '%s': %v", role, err)
+		}
+	}
+}
+func waitForKeycloak(baseURL string) {
+	for {
+		resp, err := http.Get(baseURL)
+		if err == nil && resp.StatusCode == http.StatusOK {
+			log.Println("Keycloak is ready")
+			return
+		}
+		log.Println("Waiting for Keycloak...")
+		time.Sleep(5 * time.Second)
 	}
 }

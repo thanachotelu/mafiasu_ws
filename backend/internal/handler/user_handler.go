@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log"
 	"mafiasu_ws/internal/interfaces"
 	"mafiasu_ws/internal/models"
 	"net/http"
@@ -37,19 +38,31 @@ func (h *UserHandler) GetAllUsers(c *gin.Context) {
 }
 
 func (h *UserHandler) AddUser(c *gin.Context) {
-	var req models.CreateUserRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
-		return
-	}
+    var req models.CreateUserRequest
 
-	user, err := h.userService.AddUser(c.Request.Context(), req)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to add user"})
-		return
-	}
+    // ตรวจสอบว่า JSON ที่ส่งมาถูกต้องหรือไม่
+    if err := c.ShouldBindJSON(&req); err != nil {
+        log.Printf("Invalid request body: %v", err)
+        c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+        return
+    }
 
-	c.JSON(http.StatusCreated, user)
+    log.Printf("Request data: %+v", req)
+
+    // เรียกใช้ AddUser จาก userService
+    user, err := h.userService.AddUser(c.Request.Context(), req)
+    if err != nil {
+        log.Printf("Error adding user: %v", err)
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+
+    // ส่ง Response กลับไปยัง Client
+    log.Printf("User added successfully: %+v", user)
+    c.JSON(http.StatusCreated, gin.H{
+        "message": "User added successfully",
+        "user":    user,
+    })
 }
 
 func (h *UserHandler) UpdateUser(c *gin.Context) {

@@ -1,6 +1,7 @@
 package repository
 
 import (
+    "log"
 	"context"
 	"fmt"
 	"mafiasu_ws/internal/models"
@@ -16,9 +17,28 @@ func NewUserRepository(db *pgxpool.Pool) *userRepository {
 	return &userRepository{db: db}
 }
 
+// CreateUser inserts a new user into the users table
+// repository/user_repository.go
+
+
+
+
+
+// GetUserByID retrieves a user by their UUID
 func (r *userRepository) GetUserByID(ctx context.Context, id string) (models.User, error) {
 	var user models.User
 	err := r.db.QueryRow(ctx, `
+	SELECT user_id, username, firstname, lastname, email, status
+	FROM users WHERE user_id = $1
+`, id).Scan(
+		&user.UserID,
+		&user.Username,
+		&user.Firstname,
+		&user.Lastname,
+		&user.Email,
+		&user.Status,
+	)
+	err = r.db.QueryRow(ctx, `
 	SELECT user_id, username, firstname, lastname, email, status
 	FROM users WHERE user_id = $1
 `, id).Scan(
@@ -52,29 +72,31 @@ func (r *userRepository) GetAllUsers(ctx context.Context) ([]models.User, error)
 }
 
 func (r *userRepository) AddUser(ctx context.Context, user models.CreateUserRequest) (models.User, error) {
-	var newUser models.User
-	err := r.db.QueryRow(ctx, `
-		INSERT INTO users (username, password_hash, firstname, lastname, phonenumber, email, status)
-		VALUES ($1, crypt($2, gen_salt('bf')), $3, $4, $5, $6, 'active')
-		RETURNING user_id, username, firstname, lastname, phonenumber, email, status
-	`,
-		user.Username,
-		user.Password,
-		user.Firstname,
-		user.Lastname,
-		user.Phonenumber,
-		user.Email,
-	).Scan(
-		&newUser.UserID,
-		&newUser.Username,
-		&newUser.Firstname,
-		&newUser.Lastname,
-		&newUser.Phonenumber,
-		&newUser.Email,
-		&newUser.Status,
-	)
+    query := `
+        INSERT INTO users (username, password_hash, firstname, lastname, phonenumber, email, role, status)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        RETURNING user_id, created_at, updated_at
+    `
+    log.Printf("Executing query: %s", query)
+    log.Printf("With values: Username=%s, PasswordHash=%s, Firstname=%s, Lastname=%s, Phonenumber=%s, Email=%s",
+        user.Username, user.Password, user.Firstname, user.Lastname, user.Phonenumber, user.Email)
 
-	return newUser, err
+    var newUser models.User
+    err := r.db.QueryRow(ctx, query,
+        user.Username,
+        user.Password, // ต้องเป็นรหัสผ่านที่ถูกแฮชแล้ว
+        user.Firstname,
+        user.Lastname,
+        user.Phonenumber,
+        user.Email,
+		user.Role,       // ใช้ Role ที่ส่งมาจาก Client
+        "active",     // ค่า status เริ่มต้น
+    ).Scan(&newUser.UserID, &newUser.CreatedAt, &newUser.UpdatedAt)
+    if err != nil {
+        log.Printf("Error executing query: %v", err)
+        return models.User{}, fmt.Errorf("failed to insert user: %w", err)
+    }
+    return newUser, nil
 }
 
 func (r *userRepository) UpdateUser(ctx context.Context, id string, input models.User) (models.User, error) {

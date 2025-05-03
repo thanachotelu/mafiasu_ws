@@ -1,10 +1,10 @@
-package routes
+ package routes
 
-import (
+ import (
 	"mafiasu_ws/internal/handler"
 
-	"github.com/gin-gonic/gin"
-)
+ 	"github.com/gin-gonic/gin"
+ )
 
 func RegisterUserRoutes(r *gin.Engine, userHandlers *handler.UserHandler) {
 	v1 := r.Group("/api/v1")

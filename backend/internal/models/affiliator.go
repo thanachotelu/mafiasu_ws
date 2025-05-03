@@ -10,6 +10,7 @@ type Affiliator struct {
 	CommissionRate  float64   `db:"commission_rate"`
 	TotalCommission float64   `db:"total_commission"`
 	Balance         float64   `db:"balance"`
+	ApiKey         string    `db:"api_key" json:"api_key"`
 	CreatedAt       time.Time `db:"created_at"`
 	UpdatedAt       time.Time `db:"updated_at"`
 }

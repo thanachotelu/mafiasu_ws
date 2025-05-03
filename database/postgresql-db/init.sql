@@ -1,6 +1,7 @@
 create EXTENSION if not exists "uuid-ossp";
 create type user_status as enum ('active','inactive','banned','pending');
 create type car_status as enum ('active','inactive');
+create type booking_status as enum ('confirmed','unconfirmed');
 
 create table users (
     user_id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -9,14 +10,14 @@ create table users (
     firstname VARCHAR(50) NOT NULL,
     lastname VARCHAR(50) NOT NULL,
     phonenumber VARCHAR(12) NOT NULL,
-    email VARCHAR(50) NOT NULL,
+    email VARCHAR(50) NOT NULL UNIQUE,
     role VARCHAR(50) default 'user',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp,
     status user_status DEFAULT 'active'
 );
 
-Create table affiliator (
+CREATE TABLE affiliator (
     affiliator_id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id uuid NOT NULL,
     affiliate_code VARCHAR(20) UNIQUE NOT NULL,
@@ -24,10 +25,37 @@ Create table affiliator (
     commission_rate DECIMAL(5,2) DEFAULT 10.00,
     total_commission DECIMAL(12,2) DEFAULT 0.00,
     balance DECIMAL(12,2) DEFAULT 0.00,
+    api_key TEXT UNIQUE NOT NULL, -- เก็บ API Key ของ Affiliator
     created_at TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp,
     CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
+
+CREATE OR REPLACE FUNCTION fn_create_affiliator()
+RETURNS trigger AS $$
+DECLARE
+  code TEXT := substring(uuid_generate_v4()::text,1,8);
+  key  TEXT := uuid_generate_v4()::text;
+BEGIN
+  INSERT INTO affiliator (
+    affiliator_id, user_id, affiliate_code, referral_link, api_key
+  ) VALUES (
+    uuid_generate_v4(),
+    NEW.user_id,
+    code,
+    'https://yourdomain.com/ref/' || code,
+    key
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+DROP TRIGGER IF EXISTS trg_after_user_insert ON users;
+CREATE TRIGGER trg_after_user_insert
+AFTER INSERT ON users
+FOR EACH ROW
+EXECUTE FUNCTION fn_create_affiliator();
 
 create table cars (
     car_id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -45,22 +73,29 @@ create table cars (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp
 );
 
-create table booking (
+CREATE TABLE trackclicks (
+    session_id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    car_id uuid REFERENCES cars (car_id) NOT NULL,
+    affiliator_id uuid REFERENCES affiliator (affiliator_id) NOT NULL,
+    referral_link TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT current_timestamp,
+    updated_at TIMESTAMPTZ DEFAULT current_timestamp
+);
+
+CREATE TABLE booking (
     book_id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id uuid REFERENCES users (user_id) NOT NULL ,
+    session_id uuid REFERENCES trackclicks (session_id),
+    user_id uuid REFERENCES users (user_id) NOT NULL,
     car_id uuid REFERENCES cars (car_id) NOT NULL,
     affiliator_id uuid REFERENCES affiliator (affiliator_id),
     total_price DECIMAL(10, 2) NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp
+    pickup_date DATE,
+    return_date DATE,
+    status booking_status DEFAULT 'unconfirmed',
+    created_at TIMESTAMPTZ DEFAULT current_timestamp,
+    updated_at TIMESTAMPTZ DEFAULT current_timestamp
 );
 
-CREATE TABLE clients (
-    id SERIAL PRIMARY KEY,
-    name TEXT NOT NULL,
-    email TEXT UNIQUE NOT NULL,
-    api_key TEXT UNIQUE NOT NULL
-);
 
 CREATE TABLE logs (
     id SERIAL PRIMARY KEY,
@@ -74,6 +109,12 @@ CREATE TABLE logs (
 CREATE TABLE data (
     id SERIAL PRIMARY KEY,
     content TEXT NOT NULL
+);
+
+CREATE TABLE carimages (
+    car_id uuid,
+    image_path text,
+    foreign key (car_id) REFERENCES cars(car_id)
 );
 
 INSERT INTO users (username, password_hash, firstname, lastname, phonenumber, email, role, status)
@@ -123,3 +164,34 @@ INSERT INTO cars (brand, model, license_plate, cartype, seat, doors, geartype, f
 ('Toyota', 'Revo', '9ณว 2157', 'กระบะ 4 ประตู', 5, 4, 'อัตโนมัติ CVT', 'ดีเซล', 1200.00, 'active', NOW(), NOW()),
 ('Isuzu', 'D-Max', '3ณจ 5097', 'กระบะ 4 ประตู', 5, 4, 'อัตโนมัติ CVT', 'ดีเซล', 1250.00, 'active', NOW(), NOW()),
 ('Ford', 'Ranger', '7ขบ 1482', 'กระบะ 4 ประตู', 5, 4, 'อัตโนมัติ CVT', 'ดีเซล', 1100.00, 'active', NOW(), NOW());
+
+insert into carimages (car_id, image_path) values 
+((select car_id from cars where model = 'Hiace' and license_plate = '1 กย 5012' limit 1),'assets/images/Hiace.png'),
+((select car_id from cars where model = 'Commuter' and license_plate = '2กข 4821' limit 1),'assets/images/Commuter.png'),
+((select car_id from cars where model = 'Staria' and license_plate = '4ขจ 1739' limit 1),'assets/images/Staria.png'),
+((select car_id from cars where model = 'New H1 รุ่น Elite เสริมประตูไฟฟ้า' and license_plate = '5งบ 9273' limit 1),'assets/images/New H1 รุ่น Elite เสริมประตูไฟฟ้า.png'),
+((select car_id from cars where model = 'Fortuner' and license_plate = '1 กย 5012' limit 1),'assets/images/Fortuner.png'),
+((select car_id from cars where model = 'Sienta' and license_plate = '3คด 0152' limit 1),'assets/images/Sienta.png'),
+((select car_id from cars where model = 'Avanza' and license_plate = '1จร 6048' limit 1),'assets/images/Avanza.png'),
+((select car_id from cars where model = 'Camry' and license_plate = '7ขท 8317' limit 1),'assets/images/Camry.png'),
+((select car_id from cars where model = 'Accord' and license_plate = '2ณฟ 7921' limit 1),'assets/images/Accord.png'),
+((select car_id from cars where model = 'New Hybrid Camry' and license_plate = '9ดน 3106' limit 1),'assets/images/New Hybrid Camry.png'),
+((select car_id from cars where model = 'Accord 1.5 TURBO' and license_plate = '6นย 5045' limit 1),'assets/images/Accord 1.5 TURBO.png'),
+((select car_id from cars where model = 'D-Max Cab4 1.9AT' and license_plate = '8พค 1698' limit 1),'assets/images/D-Max Cab4 1.9AT.png'),
+((select car_id from cars where model = 'Xpander All New (2024)' and license_plate = '8ปพ 2874' limit 1),'assets/images/Xpander All New.png'),
+((select car_id from cars where model = 'All New Mu-X' and license_plate = '3บว 1360' limit 1),'assets/images/All New Mu-X.png'),
+((select car_id from cars where model = 'City 1.0 Turbo (RS)' and license_plate = 'ศน 2483' limit 1),'assets/images/City 1.0 Turbo (RS).png'),
+((select car_id from cars where model = 'City 1.0 Turbo (RS)' and license_plate = '5พษ 9185' limit 1),'assets/images/City 1.0 Turbo (RS).png'),
+((select car_id from cars where model = 'New H1 รุ่น Elite เสริมประตูไฟฟ้า' and license_plate = '7สข 4871'  limit 1),'assets/images/New H1 รุ่น Elite เสริมประตูไฟฟ้า.png'),
+((select car_id from cars where model = 'Yaris' and license_plate = 'ภค 7012' limit 1),'assets/images/Yaris.png'),
+((select car_id from cars where model = 'Vios' and license_plate = 'มช 5239' limit 1),'assets/images/Vios.png'),
+((select car_id from cars where model = 'Altis' and license_plate = '8กฟ 6524' limit 1),'assets/images/Altis.png'),
+((select car_id from cars where model = 'Revo' and license_plate = '9ณว 2157' limit 1),'assets/images/Revo.png'),
+((select car_id from cars where model = 'D-Max' and license_plate = '3ณจ 5097' limit 1),'assets/images/D-Max.png'),
+((select car_id from cars where model = 'Ranger' and license_plate = '7ขบ 1482' limit 1),'assets/images/Ranger.png');
+
+insert into affiliator (user_id,affiliate_code,referral_link,commission_rate,total_commission,balance,created_at,updated_at) values
+((select user_id from users where username = 'saturn'),'ABC1234','example@test.com',5,20000,20000,NOW(),NOW());
+
+insert into booking (user_id,car_id,total_price,pickup_date,return_date,created_at,updated_at) values
+((select user_id from users where username = 'saturn'),(select car_id from cars where model = 'Staria'),2500,'2025-05-01','2025-05-03',NOW(),NOW());
