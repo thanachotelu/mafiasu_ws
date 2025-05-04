@@ -9,7 +9,7 @@
 </template>
 
 <script setup>
-import { defineProps } from 'vue';
+// import { defineProps } from 'vue';
 import ServiceCard from './ServiceCard.vue';
 
 const props = defineProps({

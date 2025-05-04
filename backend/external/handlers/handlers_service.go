@@ -71,7 +71,7 @@ func (h *AffiliateHandler) GetAllAffiliates(c *gin.Context) {
 // @Security BearerAuth
 // @Success     200 {object} Car
 // @Failure     404 {object} ErrorResponse
-// @Router      /{affiliate_id}/cars [get]
+// @Router      /affiliates/{affiliate_id}/cars [get]
 func (h *AffiliateHandler) GetAvailableCars(c *gin.Context) {
 	affiliateID := c.Param("affiliate_id")
 
@@ -94,7 +94,7 @@ func (h *AffiliateHandler) GetAvailableCars(c *gin.Context) {
 // @Security BearerAuth
 // @Success     200 {object} models.BookingDetailResponse
 // @Failure     404 {object} ErrorResponse
-// @Router      /{affiliate_id}/bookings/{booking_id} [get]
+// @Router      /affiliates/{affiliate_id}/bookings/{booking_id} [get]
 func (h *AffiliateHandler) GetAffiliateBookingDetail(c *gin.Context) {
 	affiliateID := c.Param("affiliate_id")
 	bookingID := c.Param("booking_id")
