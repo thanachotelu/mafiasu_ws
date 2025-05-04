@@ -11,6 +11,7 @@ import (
 
 	"mafiasu_ws/config"
 	"mafiasu_ws/database"
+	_ "mafiasu_ws/docs" // This will be generated
 
 	extInterfaces "mafiasu_ws/external/interfaces"
 	extRepo "mafiasu_ws/external/repository"
@@ -24,9 +25,13 @@ import (
 
 // @title          MafiaCar API
 // @version        1.0
-// @description    APIs for MafiaCar affiliate user program
-// @host          localhost:8000
-// @BasePath      /api/v1
+// @description    Lists of avaliable API for MafiaCar affiliator program
+// @host           localhost:8000
+// @BasePath       /api/v1
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Insert Authorization key below
 
 func main() {
 	// โหลด configuration

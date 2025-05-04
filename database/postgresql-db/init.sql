@@ -96,6 +96,12 @@ CREATE TABLE booking (
     updated_at TIMESTAMPTZ DEFAULT current_timestamp
 );
 
+CREATE TABLE clients (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    api_key TEXT UNIQUE NOT NULL
+);
 
 CREATE TABLE logs (
     id SERIAL PRIMARY KEY,
