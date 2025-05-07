@@ -1,23 +1,51 @@
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { authService } from '../services/authService';
 
-const username = ref('')
-const password = ref('')
-const errorMessage = ref('')
-const router = useRouter()
+const router = useRouter();
+const isLoading = ref(false);
+const error = ref('');
+const showPassword = ref(false);
 
-const handleLogin = () => {
-  // Demo credentials check
-  if (username.value === 'Test' && password.value === 'Pass1234') {
-    // Get NavBar component instance and update login state
-    const navBar = document.querySelector('nav').__vueParentComponent.exposed
-    navBar.isLoggedIn.value = true
-    router.push('/dashboard') // Redirect to home page after successful login
-  } else {
-    errorMessage.value = 'Invalid username or password. Please try again.'
+const formData = ref({
+  username: '',
+  password: ''
+});
+
+const handleLogin = async (e) => {
+  e.preventDefault();
+  
+  // Form validation
+  if (!formData.value.username || !formData.value.password) {
+    error.value = 'Please fill in all fields';
+    return;
   }
-}
+
+  isLoading.value = true;
+  error.value = '';
+
+  try {
+    const response = await authService.login(formData.value);
+    
+    // Check if user has affiliate role
+    const user = response.user;
+    if (!user.roles?.includes('Affiliator')) {
+      error.value = 'Access denied. Affiliate account required.';
+      return;
+    }
+
+    router.push('/dashboard');
+  } catch (err) {
+    error.value = err.message;
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const togglePasswordVisibility = () => {
+  showPassword.value = !showPassword.value;
+};
 </script>
 
 <template>
@@ -25,30 +53,59 @@ const handleLogin = () => {
     <div class="login-page">
       <div class="login-container">
         <h1>Affiliator Login</h1>
-        <form @submit.prevent="handleLogin" class="login-form">
+        <form @submit="handleLogin" class="login-form">
+          <div v-if="error" class="error-message" role="alert">
+            {{ error }}
+          </div>
+
           <div class="form-group">
-            <label for="username">Username / Email</label>
+            <label for="username">Username</label>
             <input
               type="text"
               id="username"
-              v-model="username"
+              v-model="formData.username"
               required
+              autocomplete="username"
+              :disabled="isLoading"
             />
           </div>
+
           <div class="form-group">
             <label for="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              v-model="password"
-              required
-            />
+            <div class="password-input">
+              <input
+                :type="showPassword ? 'text' : 'password'"
+                id="password"
+                v-model="formData.password"
+                required
+                autocomplete="current-password"
+                :disabled="isLoading"
+              />
+              <button 
+                type="button"
+                class="toggle-password"
+                @click="togglePasswordVisibility"
+                :aria-label="showPassword ? 'Hide password' : 'Show password'"
+              >
+                {{ showPassword ? '🔓' : '🔒' }}
+              </button>
+            </div>
           </div>
-          <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
-          <button type="submit" class="login-button">Login</button>
+
+          <button 
+            type="submit" 
+            class="login-button"
+            :disabled="isLoading"
+          >
+            {{ isLoading ? 'Logging in...' : 'Login' }}
+          </button>
         </form>
+
         <p class="register-link">
-          don't have account yet? <RouterLink to="/affiliator-form" class="nav-link">register now</RouterLink>
+          Don't have an account yet? 
+          <RouterLink to="/affiliator-form" class="nav-link">
+            Register now
+          </RouterLink>
         </p>
       </div>
     </div>
@@ -56,106 +113,5 @@ const handleLogin = () => {
 </template>
 
 <style scoped>
-.main-container {
-  max-width: 100%;
-  margin: 0;
-  padding: 20px;
-  width: 100%;
-}
-
-.login-page {
-  display: flex;
-  justify-content: flex-start; /* Changed from flex-end to flex-start */
-  align-items: center;
-  height: 80vh;
-  background-image: url('../assets/images/LoginAffiliator.png'); 
-  background-size: cover;
-  background-position: center;
-  padding-left: 10%; /* Changed from padding-right to padding-left */
-}
-
-.login-container {
-  width: 350px;
-  padding: 40px;
-  background-color: rgba(255, 255, 255, 0.9);
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-h1 {
-  text-align: center;
-  margin-bottom: 30px;
-  color: #333;
-  font-size: 24px;
-}
-
-.login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-label {
-  font-weight: 600;
-  color: #555;
-}
-
-input {
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-  transition: border-color 0.3s;
-}
-
-input:focus {
-  border-color: #4285f4;
-  outline: none;
-}
-
-.login-button {
-  padding: 12px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  margin-top: 10px;
-}
-
-.login-button:hover {
-  background-color: #338f36;
-}
-
-.register-link {
-  text-align: center;
-  margin-top: 20px;
-  color: #666;
-  font-size: 14px;
-}
-
-.register-link a {
-  color: #4CAF50;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.register-link a:hover {
-  text-decoration: underline;
-}
-.error-message {
-  color: #ff4444;
-  text-align: center;
-  margin-top: 10px;
-  font-size: 14px;
-}
+@import '../assets/affiliate-login.css';
 </style>

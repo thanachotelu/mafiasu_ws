@@ -1,26 +1,27 @@
 .main-container {
-  max-width: 100%; /* กำหนดความกว้างสูงสุดของหน้า */
-  margin: 0; /* จัดให้อยู่กึ่งกลาง */
-  padding: 10px; /* ระยะห่างจากขอบซ้ายขวา */
+  max-width: 100%;
+  margin: 0;
+  padding: 20px; /* Increased padding for better spacing */
   width: 100%;
+  min-height: 100vh; /* Ensure full viewport height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .form-container {
   width: 100%;
-  /* min-height: 100vh; */
-  height: fit-content;
+  height: auto; /* Changed from fixed height to auto */
   margin: 0;
-  padding: 40px 0;
+  padding: 40px 20px; /* Added horizontal padding */
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-
-  /* เพิ่มส่วนนี้แทน background-color */
+  align-items: center;
   background-image: url("../assets/images/affiliateForm.jpg");
-  background-size: cover; /* ให้รูปเต็มพื้นที่ */
-  background-position: center; /* จัดรูปให้อยู่กลาง */
-  background-repeat: no-repeat; /* ไม่ให้รูปภาพซ้ำ */
-  background-attachment: fixed; /* ให้พื้นหลังไม่เลื่อนตามหน้า */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 .content-wrapper {
@@ -60,24 +61,32 @@ h1 {
 
 .white-box {
   width: 100%;
-  height: 900px;
+  height: auto; /* Changed from fixed height to auto */
+  min-height: auto; /* Remove fixed minimum height */
+  height: fit-content; /* Add this line */
   background-color: white;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   display: flex;
   overflow: hidden;
+  margin: 20px 0; /* Added vertical margin */
 }
 
 .form-section {
-  flex: 1; /* เปลี่ยนจาก 1 เป็น 2 */
+  flex: 2; /* Change from 1 to 2 to give form more width */
   padding: 40px;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .image-section {
-  flex: 1; /* รักษาไว้ที่ 1 */
+  flex: 1;
   display: flex;
   overflow: hidden;
+  max-height: 100%; /* Add this line */
+  align-self: stretch; /* Add this line */
 }
 
 .side-image {
@@ -85,6 +94,7 @@ h1 {
   height: 100%;
   object-fit: cover;
   object-position: center;
+  max-height: 100%; /* Add this line */
 }
 
 .placeholder-image {
@@ -103,6 +113,7 @@ form {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  width: 100%; /* Ensure full width */
 }
 
 label {
@@ -115,6 +126,8 @@ input {
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 1rem;
+  width: 100%; /* Ensure full width */
+  box-sizing: border-box; /* Include padding in width calculation */
 }
 
 .name-fields,
@@ -166,6 +179,35 @@ input.error {
 
 .register-btn:hover {
   background-color: #45a049;
+}
+
+.password-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-field input {
+  flex: 1;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 8px;
+  font-size: 1.2em;
+  color: #666;
+}
+
+.toggle-password:hover {
+  color: #333;
+}
+
+.toggle-password:focus {
+  outline: none;
 }
 
 @media (max-width: 768px) {

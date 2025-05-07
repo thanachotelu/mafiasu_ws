@@ -3,7 +3,6 @@ package interfaces
 import (
 	"context"
 	"mafiasu_ws/internal/models"
-	
 )
 
 type UserService interface {

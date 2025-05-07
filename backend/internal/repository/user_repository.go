@@ -1,7 +1,6 @@
 package repository
 
 import (
-    "log"
 	"context"
 	"fmt"
 	"mafiasu_ws/internal/models"
@@ -19,10 +18,6 @@ func NewUserRepository(db *pgxpool.Pool) *userRepository {
 
 // CreateUser inserts a new user into the users table
 // repository/user_repository.go
-
-
-
-
 
 // GetUserByID retrieves a user by their UUID
 func (r *userRepository) GetUserByID(ctx context.Context, id string) (models.User, error) {
@@ -71,32 +66,42 @@ func (r *userRepository) GetAllUsers(ctx context.Context) ([]models.User, error)
 	return users, nil
 }
 
-func (r *userRepository) AddUser(ctx context.Context, user models.CreateUserRequest) (models.User, error) {
-    query := `
-        INSERT INTO users (username, password_hash, firstname, lastname, phonenumber, email, role, status)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        RETURNING user_id, created_at, updated_at
-    `
-    log.Printf("Executing query: %s", query)
-    log.Printf("With values: Username=%s, PasswordHash=%s, Firstname=%s, Lastname=%s, Phonenumber=%s, Email=%s",
-        user.Username, user.Password, user.Firstname, user.Lastname, user.Phonenumber, user.Email)
+func (r *userRepository) AddUser(ctx context.Context, user models.User) (models.User, error) {
+	var newUser models.User
+	err := r.db.QueryRow(ctx, `
+        INSERT INTO users (
+            username, password_hash, firstname, lastname, 
+            email, phonenumber, role, status
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        RETURNING username, password_hash, firstname, lastname, 
+                  email, phonenumber, role, status, created_at, updated_at
+    `,
+		user.Username,
+		user.PasswordHash, // This should be the hashed password
+		user.Firstname,
+		user.Lastname,
+		user.Email,
+		user.Phonenumber,
+		user.Role,
+		user.Status,
+	).Scan(
+		&newUser.Username,
+		&newUser.PasswordHash,
+		&newUser.Firstname,
+		&newUser.Lastname,
+		&newUser.Email,
+		&newUser.Phonenumber,
+		&newUser.Role,
+		&newUser.Status,
+		&newUser.CreatedAt,
+		&newUser.UpdatedAt,
+	)
 
-    var newUser models.User
-    err := r.db.QueryRow(ctx, query,
-        user.Username,
-        user.Password, // ต้องเป็นรหัสผ่านที่ถูกแฮชแล้ว
-        user.Firstname,
-        user.Lastname,
-        user.Phonenumber,
-        user.Email,
-		user.Role,       // ใช้ Role ที่ส่งมาจาก Client
-        "active",     // ค่า status เริ่มต้น
-    ).Scan(&newUser.UserID, &newUser.CreatedAt, &newUser.UpdatedAt)
-    if err != nil {
-        log.Printf("Error executing query: %v", err)
-        return models.User{}, fmt.Errorf("failed to insert user: %w", err)
-    }
-    return newUser, nil
+	if err != nil {
+		return models.User{}, fmt.Errorf("failed to add user: %w", err)
+	}
+
+	return newUser, nil
 }
 
 func (r *userRepository) UpdateUser(ctx context.Context, id string, input models.User) (models.User, error) {
@@ -174,7 +179,6 @@ func (r *userRepository) DeleteUser(ctx context.Context, id string) (models.User
 		&deleted.Username,
 		&deleted.PasswordHash,
 		&deleted.Firstname,
-		&deleted.Lastname,
 		&deleted.Phonenumber,
 		&deleted.Email,
 		&deleted.Role,
@@ -188,4 +192,30 @@ func (r *userRepository) DeleteUser(ctx context.Context, id string) (models.User
 	}
 
 	return deleted, nil
+}
+
+func (r *userRepository) GetUserByUsername(ctx context.Context, username string) (models.User, error) {
+	var user models.User
+	query := `
+		SELECT user_id, username, password_hash, firstname, lastname, phonenumber, email, role, created_at, updated_at, status
+		FROM users 
+		WHERE username = $1
+	`
+	err := r.db.QueryRow(ctx, query, username).Scan(
+		&user.UserID,
+		&user.Username,
+		&user.PasswordHash,
+		&user.Firstname,
+		&user.Lastname,
+		&user.Phonenumber,
+		&user.Email,
+		&user.Role,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+		&user.Status,
+	)
+	if err != nil {
+		return models.User{}, fmt.Errorf("user not found: %w", err)
+	}
+	return user, nil
 }
