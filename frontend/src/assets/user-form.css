@@ -1,0 +1,231 @@
+.main-container {
+  max-width: 100%;
+  margin: 0;
+  padding: 20px; /* Increased padding for better spacing */
+  width: 100%;
+  min-height: 100vh; /* Ensure full viewport height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.form-container {
+  width: 100%;
+  height: auto; /* Changed from fixed height to auto */
+  margin: 0;
+  padding: 40px 20px; /* Added horizontal padding */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image: url("../assets/images/userForm.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.content-wrapper {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+}
+
+.header-text {
+  text-align: center;
+  color: white;
+}
+
+h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.welcome-text {
+  margin: 0;
+  font-size: 1.2rem;
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
+.welcome-text a {
+  color: #4285f4;
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+.white-box {
+  width: 100%;
+  height: auto; /* Changed from fixed height to auto */
+  min-height: auto; /* Remove fixed minimum height */
+  height: fit-content; /* Add this line */
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  overflow: hidden;
+  margin: 20px 0; /* Added vertical margin */
+}
+
+.form-section {
+  flex: 2; /* Change from 1 to 2 to give form more width */
+  padding: 40px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.image-section {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  max-height: 100%; /* Add this line */
+  align-self: stretch; /* Add this line */
+}
+
+.side-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  max-height: 100%; /* Add this line */
+}
+
+.placeholder-image {
+  text-align: center;
+  color: #666;
+  padding: 20px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%; /* Ensure full width */
+}
+
+label {
+  font-weight: 600;
+  color: #333;
+}
+
+input {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  width: 100%; /* Ensure full width */
+  box-sizing: border-box; /* Include padding in width calculation */
+}
+
+.name-fields,
+.address-fields {
+  display: flex;
+  gap: 10px;
+}
+
+.name-fields input,
+.address-fields input {
+  flex: 1;
+}
+
+.required {
+  color: red;
+}
+
+.required-note {
+  font-size: 0.8rem;
+  color: #666;
+  margin: 0;
+}
+
+.error-message {
+  color: #c62828;
+  background-color: #ffebee;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+}
+
+input.error {
+  border-color: #c62828;
+}
+
+.register-btn {
+  background-color: #4285f4;
+  color: white;
+  padding: 14px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background-color 0.3s;
+}
+
+.register-btn:hover {
+  background-color: #275eb6;
+}
+
+.password-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-field input {
+  flex: 1;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 8px;
+  font-size: 1.2em;
+  color: #666;
+}
+
+.toggle-password:hover {
+  color: #333;
+}
+
+.toggle-password:focus {
+  outline: none;
+}
+
+@media (max-width: 768px) {
+  .white-box {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .image-section {
+    flex: 1;
+    display: flex;
+    overflow: hidden; /* เพิ่มเพื่อไม่ให้รูปภาพล้นกรอบ */
+  }
+
+  .side-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* ให้รูปภาพเต็มพื้นที่โดยรักษาสัดส่วน */
+    object-position: center; /* จัดตำแหน่งรูปให้อยู่กลาง */
+  }
+}

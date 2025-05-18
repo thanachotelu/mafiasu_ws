@@ -15,6 +15,7 @@ type AuthRepository interface {
 // Updated CreateUser to return the created userID and error
 // AssignRole now takes context and roleName
 type KeycloakService interface {
-   // CreateUser(ctx context.Context, req keycloak.CreateUserRequest) error
-    AssignRole(ctx context.Context, userID, roleName string) error
+	// CreateUser(ctx context.Context, req keycloak.CreateUserRequest) error
+	AssignRole(ctx context.Context, userID, roleName string) error
+	Login(ctx context.Context, username, password string) (string, error)
 }

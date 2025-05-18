@@ -29,14 +29,14 @@ const handleLogin = async (e) => {
   try {
     const response = await authService.login(formData.value);
     
-    // Check if user has affiliate role
+    // Check if user has user role instead of affiliate role
     const user = response.user;
-    if (!user.roles?.includes('Affiliator')) {
-      error.value = 'Access denied. Affiliate account required.';
+    if (!user.roles?.includes('User')) {
+      error.value = 'Access denied. User account required.';
       return;
     }
 
-    router.push('/dashboard');
+    router.push('/car-list');
   } catch (err) {
     error.value = err.message;
   } finally {
@@ -52,18 +52,18 @@ const togglePasswordVisibility = () => {
 <template>
   <NavBar1 />
   <div class="main-container">
-    <!-- Add customer banner -->
-    <div class="customer-banner">
-      <p>Are you a customer? 
-        <RouterLink to="/login-user" class="customer-link">
-          Login as Customer
+    <!-- Add affiliator banner -->
+    <div class="affiliator-banner">
+      <p>Are you an affiliator? 
+        <RouterLink to="/login-affiliator" class="affiliator-link">
+          Login as Affiliator
         </RouterLink>
       </p>
     </div>
     
     <div class="login-page">
       <div class="login-container">
-        <h1>Affiliator Login</h1>
+        <h1>Customer Login</h1>
         <form @submit="handleLogin" class="login-form">
           <div v-if="error" class="error-message" role="alert">
             {{ error }}
@@ -114,8 +114,8 @@ const togglePasswordVisibility = () => {
 
         <p class="register-link">
           Don't have an account yet? 
-          <RouterLink to="/affiliator-form" class="nav-link">
-            Register now
+          <RouterLink to="/user-form" class="nav-link">
+            Register Now
           </RouterLink>
         </p>
       </div>
@@ -124,9 +124,9 @@ const togglePasswordVisibility = () => {
 </template>
 
 <style scoped>
-@import '../assets/affiliate-login.css';
+@import '../assets/user-login.css';
 
-.customer-banner {
+.affiliator-banner {
   background-color: #f8f9fa;
   padding: 10px 0;
   text-align: center;
@@ -134,20 +134,20 @@ const togglePasswordVisibility = () => {
   width: 100%;
 }
 
-.customer-banner p {
+.affiliator-banner p {
   margin: 0;
   font-size: 0.9rem;
   color: #6c757d;
 }
 
-.customer-link {
-  color: #4285f4;
+.affiliator-link {
+  color: #4CAF50;
   text-decoration: none;
   font-weight: 600;
   margin-left: 5px;
 }
 
-.customer-link:hover {
+.affiliator-link:hover {
   text-decoration: underline;
 }
 </style>

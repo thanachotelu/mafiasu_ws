@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -62,6 +63,9 @@ func main() {
 	bookingService := intService.NewBookingService(bookingRepo)
 	bookingHandler := intHandler.NewBookingHandler(bookingService)
 
+	// Auth
+	authHandler := intHandler.NewAuthHandler(userService, kc)
+
 	// Affiliates
 	affiliateRepo := extRepo.NewAffiliateRepository(db.GetPool())
 	affiliateService := extService.NewAffiliateService(affiliateRepo)
@@ -69,17 +73,14 @@ func main() {
 	initializeRoles(kc)
 	r := gin.Default()
 
-	// Enable CORS (if needed)
-	// r.Use(func(c *gin.Context) {
-	// 	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-	// 	c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-	// 	c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-	// 	if c.Request.Method == "OPTIONS" {
-	// 		c.AbortWithStatus(204)
-	// 		return
-	// 	}
-	// 	c.Next()
-	// })
+	// Enable CORS
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5173", "http://localhost:8000"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Authorization", "Content-Type"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
@@ -90,6 +91,7 @@ func main() {
 	intRoutes.RegisterUserRoutes(r, userHandler)
 	intRoutes.RegisterCarRoutes(r, carHandler)
 	intRoutes.RegisterBookingRoutes(r, bookingHandler)
+	intRoutes.RegisterAuthRoutes(r, authHandler)
 	extRoutes.RegisterAffiliateRoutes(r, affiliateService)
 
 	if err := r.Run(":8000"); err != nil {

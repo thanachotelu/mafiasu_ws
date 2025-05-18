@@ -1,7 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Homepage from '../pages/Homepage.vue';
 import LoginAffiliate from '../pages/LoginAffiliate.vue';
-import AffiliatorForm from '../pages/AffiliatorForm.vue';
+import LoginUser from '../pages/LoginUser.vue';
+import AffiliatorForm from '../pages/FormAffiliator.vue';
+import UserForm from '../pages/FormUser.vue';
 import CarLists from '../pages/CarLists.vue';
 import Dashboard from '../pages/Dashboard.vue';
 import CarDetail from '../pages/CarDetail.vue';
@@ -50,9 +52,19 @@ const routes = [
     component: LoginAffiliate,
   },
   {
+    path: '/login-user',
+    name: 'LoginUser',
+    component: LoginUser,
+  },
+  {
     path: '/affiliator-form',
     name: 'AffiliatorForm',
     component: AffiliatorForm,
+  },
+  {
+    path: '/user-form',
+    name: 'UserForm',
+    component: UserForm,
   },
   {
     path: '/car-lists',

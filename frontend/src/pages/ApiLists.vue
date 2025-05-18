@@ -1,4 +1,5 @@
 <template>
+    <NavBar2 />
     <div class="api-docs-container">
         <h1>APIs Documentation</h1>
         <div class="swagger-container">
@@ -13,7 +14,7 @@
 </template>
 
 <script setup>
-// No script needed
+import NavBar2 from '../components/NavBar2.vue';
 </script>
 
 <style scoped>

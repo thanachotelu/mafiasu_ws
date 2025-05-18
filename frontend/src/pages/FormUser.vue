@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { authService } from '../services/authService';
+import NavBar1 from '../components/NavBar1.vue';
 
 const router = useRouter();
 const isLoading = ref(false);
@@ -15,7 +16,7 @@ const formData = ref({
   phonenumber: '',
   email: '',
   password: '',
-  role: 'Affiliator'
+  role: 'user'
 });
 
 const handleLogin = async (e) => {
@@ -25,7 +26,7 @@ const handleLogin = async (e) => {
 
   try {
     await authService.register(formData.value);
-    router.push('/login-affiliator');
+    router.push('/login-user');
   } catch (err) {
     error.value = err.message;
   } finally {
@@ -35,15 +36,16 @@ const handleLogin = async (e) => {
 </script>
 
 <template>
+  <NavBar1 />
   <div class="main-container">
     <div class="form-container">
       <div class="content-wrapper">
         <div class="header-text">
-          <h1>Affiliate Registration Form</h1>
-          <p class="welcome-text">Welcome to affiliate program of MafiaCar. You can start by<br>
+          <h1>Registration Account</h1>
+          <p class="welcome-text">Welcome to MafiaCar. You can start by<br>
           registering your information below.
           <br>
-          already have account? <RouterLink to="/login-affiliator" class="nav-link">Login now</RouterLink>
+          already have account? <RouterLink to="/login-user" class="nav-link">Login now</RouterLink>
           </p>
         </div>
         <div class="white-box">
@@ -129,7 +131,7 @@ const handleLogin = async (e) => {
           </div>
           <div class="image-section">
             <img 
-              src="../assets/images/affiliateForm2.jpg" 
+              src="../assets/images/userForm2.jpg" 
               alt="Affiliate Program"
               class="side-image"
             >
@@ -141,5 +143,5 @@ const handleLogin = async (e) => {
 </template>
 
 <style scoped>
-@import '../assets/affiliate-form.css';
+@import '../assets/user-form.css';
 </style>

@@ -14,6 +14,7 @@ type KeycloakConfig struct {
 	AdminClientID string // เช่น admin-cli
 	AdminUser     string // Admin username
 	AdminPass     string // Admin password
+	ClientID      string // Client ID สำหรับแอปพลิเคชัน
 }
 
 // Config โครงสร้างหลักของการตั้งค่าแอป

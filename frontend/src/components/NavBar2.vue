@@ -5,21 +5,12 @@
       <h2>MafiaCar</h2>
     </div>
     <div class="nav-links">
-      <template v-if="!isLoggedIn">
-        <RouterLink to="/" class="nav-link">Home</RouterLink>
-      </template>
 
       <RouterLink to="/car-lists" class="nav-link">Car Listing</RouterLink>
-      
-      <template v-if="!isLoggedIn">
-        <RouterLink to="/login-affiliator" class="nav-link">Login As Affiliator</RouterLink>
-      </template>
-      
-      <template v-else>
-        <RouterLink to="/api-lists" class="nav-link">APIs Documentation</RouterLink>
-        <RouterLink to="/dashboard" class="nav-link">Dashboard</RouterLink>
-        <a href="#" @click.prevent="handleLogout" class="nav-link">Logout</a>
-      </template>
+      <RouterLink to="/api-lists" class="nav-link">APIs Documentation</RouterLink>
+      <RouterLink to="/dashboard" class="nav-link">Dashboard</RouterLink>
+      <a href="#" @click.prevent="handleLogout" class="nav-link">Logout</a>
+
     </div>
     <!-- Add popup message -->
     <div v-if="showPopup" class="popup" :class="{ 'fade-out': isClosing }">
