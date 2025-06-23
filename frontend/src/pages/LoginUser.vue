@@ -31,12 +31,9 @@ const handleLogin = async (e) => {
     
     // Check if user has user role instead of affiliate role
     const user = response.user;
-    if (!user.roles?.includes('User')) {
-      error.value = 'Access denied. User account required.';
-      return;
-    }
+   
 
-    router.push('/car-list');
+    router.push('/car-lists');
   } catch (err) {
     error.value = err.message;
   } finally {

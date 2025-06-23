@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"io"
 	"log"
 	"mafiasu_ws/config"
@@ -235,48 +236,45 @@ func (s *KeycloakServices) CreateRoleIfNotExists(roleName string) error {
 }
 
 func (s *KeycloakServices) Login(ctx context.Context, username, password string) (string, error) {
-	url := fmt.Sprintf("%s/realms/%s/protocol/openid-connect/token", s.BaseURL, s.Realm)
+    urlStr := fmt.Sprintf("%s/realms/%s/protocol/openid-connect/token", s.BaseURL, s.Realm)
 
-	// Using only the required fields for public client authentication
-	data := fmt.Sprintf("grant_type=password&client_id=%s&username=%s&password=%s",
-		s.cfg.ClientID, // Make sure this matches your Keycloak client ID
-		username,
-		password)
+    form := url.Values{}
+    form.Set("grant_type", "password")
+    form.Set("client_id", s.cfg.ClientID)
+    form.Set("username", username)
+    form.Set("password", password)
 
-	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBufferString(data))
-	if err != nil {
-		return "", fmt.Errorf("failed to create request: %w", err)
-	}
+    req, err := http.NewRequestWithContext(ctx, "POST", urlStr, bytes.NewBufferString(form.Encode()))
+    if err != nil {
+        return "", fmt.Errorf("failed to create request: %w", err)
+    }
+    req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+    log.Printf("Attempting login for user: %s", username)
 
-	// Add logging for debugging
-	log.Printf("Attempting login for user: %s", username)
+    resp, err := s.httpClient.Do(req)
+    if err != nil {
+        return "", fmt.Errorf("failed to send request: %w", err)
+    }
+    defer resp.Body.Close()
 
-	resp, err := s.httpClient.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("failed to send request: %w", err)
-	}
-	defer resp.Body.Close()
+    bodyBytes, err := io.ReadAll(resp.Body)
+    if err != nil {
+        return "", fmt.Errorf("failed to read response body: %w", err)
+    }
 
-	// Read response body for better error reporting
-	bodyBytes, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("failed to read response body: %w", err)
-	}
+    if resp.StatusCode != http.StatusOK {
+        log.Printf("Login failed. Status: %d, Body: %s", resp.StatusCode, string(bodyBytes))
+        return "", fmt.Errorf("authentication failed with status: %d", resp.StatusCode)
+    }
 
-	if resp.StatusCode != http.StatusOK {
-		log.Printf("Login failed. Status: %d, Body: %s", resp.StatusCode, string(bodyBytes))
-		return "", fmt.Errorf("authentication failed with status: %d", resp.StatusCode)
-	}
+    var result struct {
+        AccessToken string `json:"access_token"`
+    }
 
-	var result struct {
-		AccessToken string `json:"access_token"`
-	}
+    if err := json.NewDecoder(bytes.NewReader(bodyBytes)).Decode(&result); err != nil {
+        return "", fmt.Errorf("failed to decode response: %w", err)
+    }
 
-	if err := json.NewDecoder(bytes.NewReader(bodyBytes)).Decode(&result); err != nil {
-		return "", fmt.Errorf("failed to decode response: %w", err)
-	}
-
-	return result.AccessToken, nil
+    return result.AccessToken, nil
 }
