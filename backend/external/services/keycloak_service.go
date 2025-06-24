@@ -11,6 +11,7 @@ import (
 	"mafiasu_ws/external/interfaces"
 	"mafiasu_ws/external/models"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -235,22 +236,20 @@ func (s *KeycloakServices) CreateRoleIfNotExists(roleName string) error {
 }
 
 func (s *KeycloakServices) Login(ctx context.Context, username, password string) (string, error) {
-	url := fmt.Sprintf("%s/realms/%s/protocol/openid-connect/token", s.BaseURL, s.Realm)
+	urlStr := fmt.Sprintf("%s/realms/%s/protocol/openid-connect/token", s.BaseURL, s.Realm)
 
-	// Using only the required fields for public client authentication
-	data := fmt.Sprintf("grant_type=password&client_id=%s&username=%s&password=%s",
-		s.cfg.ClientID, // Make sure this matches your Keycloak client ID
-		username,
-		password)
+	form := url.Values{}
+	form.Set("grant_type", "password")
+	form.Set("client_id", s.cfg.ClientID)
+	form.Set("username", username)
+	form.Set("password", password)
 
-	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBufferString(data))
+	req, err := http.NewRequestWithContext(ctx, "POST", urlStr, bytes.NewBufferString(form.Encode()))
 	if err != nil {
 		return "", fmt.Errorf("failed to create request: %w", err)
 	}
-
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	// Add logging for debugging
 	log.Printf("Attempting login for user: %s", username)
 
 	resp, err := s.httpClient.Do(req)
@@ -259,7 +258,6 @@ func (s *KeycloakServices) Login(ctx context.Context, username, password string)
 	}
 	defer resp.Body.Close()
 
-	// Read response body for better error reporting
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", fmt.Errorf("failed to read response body: %w", err)
@@ -279,4 +277,45 @@ func (s *KeycloakServices) Login(ctx context.Context, username, password string)
 	}
 
 	return result.AccessToken, nil
+}
+func (s *KeycloakServices) CreateClientIfNotExists(clientID string) error {
+	token, err := s.GetAdminToken()
+	if err != nil {
+		return err
+	}
+	// เช็คว่ามี client นี้อยู่แล้วหรือยัง
+	url := fmt.Sprintf("%s/admin/realms/%s/clients?clientId=%s", s.cfg.BaseURL, s.cfg.Realm, clientID)
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+	resp, err := s.httpClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	var clients []interface{}
+	json.NewDecoder(resp.Body).Decode(&clients)
+	if len(clients) > 0 {
+		return nil // มีแล้ว
+	}
+	// ถ้ายังไม่มี ให้สร้างใหม่
+	createUrl := fmt.Sprintf("%s/admin/realms/%s/clients", s.cfg.BaseURL, s.cfg.Realm)
+	body := map[string]interface{}{
+		"clientId":                  clientID,
+		"enabled":                   true,
+		"publicClient":              true,
+		"directAccessGrantsEnabled": true,
+	}
+	b, _ := json.Marshal(body)
+	req, _ = http.NewRequest("POST", createUrl, bytes.NewReader(b))
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Content-Type", "application/json")
+	resp, err = s.httpClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 201 && resp.StatusCode != 204 {
+		return fmt.Errorf("failed to create client: %s", resp.Status)
+	}
+	return nil
 }

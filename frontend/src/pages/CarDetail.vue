@@ -1,5 +1,4 @@
 <template>
-  <NavBar2 />
   <div v-if="car.name">
       <div class="car-detail-container">
           <!-- Add return button -->
@@ -64,7 +63,6 @@
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
-import NavBar2 from '../components/NavBar2.vue';
 
 const router = useRouter();
 const route = useRoute();

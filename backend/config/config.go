@@ -39,6 +39,7 @@ func New() (*Config, error) {
 			AdminClientID: viper.GetString("KEYCLOAK_ADMIN_CLIENT_ID"),
 			AdminUser:     viper.GetString("KEYCLOAK_ADMIN_USER"),
 			AdminPass:     viper.GetString("KEYCLOAK_ADMIN_PASS"),
+			ClientID:      viper.GetString("KEYCLOAK_CLIENT_ID"),
 		},
 	}
 

@@ -11,4 +11,5 @@ type UserService interface {
 	AddUser(ctx context.Context, user models.CreateUserRequest) (models.User, error)
 	UpdateUser(ctx context.Context, id string, user models.User) (models.User, error)
 	DeleteUser(ctx context.Context, id string) (models.User, error)
+	GetUserByUsername(ctx context.Context, username string) (models.User, error)
 }

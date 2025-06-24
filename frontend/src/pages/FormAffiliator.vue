@@ -2,7 +2,6 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { authService } from '../services/authService';
-import NavBar1 from '../components/NavBar1.vue';
 
 const router = useRouter();
 const isLoading = ref(false);
@@ -36,7 +35,6 @@ const handleLogin = async (e) => {
 </script>
 
 <template>
-  <NavBar1 />
   <div class="main-container">
     <div class="form-container">
       <div class="content-wrapper">

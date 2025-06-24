@@ -1,5 +1,4 @@
 <template>
-  <NavBar2 />
     <div class="dashboard-container">
       <!-- ส่วนหัวหน้า Dashboard -->
       <div class="dashboard-header">
@@ -61,7 +60,6 @@
   import { ref, computed, onMounted } from 'vue';
   import { useRouter } from 'vue-router';
   import axios from 'axios';
-import NavBar2 from '../components/NavBar2.vue';
   
   const router = useRouter();
   const isLoading = ref(false);

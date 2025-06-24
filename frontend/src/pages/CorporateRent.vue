@@ -1,5 +1,4 @@
 <template>
-  <NavBar1 />
   <div class="short-rent container">
     <div class="top-banner">
       <div class="banner-content">
@@ -29,7 +28,6 @@
 </template>
 
 <script setup>
-import NavBar1 from '../components/NavBar1.vue';
 import Services from '../components/Services.vue';
 
 const corporateRentCar = [

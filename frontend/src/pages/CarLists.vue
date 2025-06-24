@@ -2,7 +2,6 @@
 import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
-import NavBar2 from '../components/NavBar2.vue';
 
 const router = useRouter();
 
@@ -53,7 +52,6 @@ const filteredCars = computed(() => {
 </script>
 
 <template>
-  <NavBar2 />
   <div class="main-container">
     <!-- Search Bar Section -->
     <div class="search-bar-container">

@@ -36,8 +36,16 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
+	// ดึง user จาก database เพื่อเอา role
+	user, err := h.userService.GetUserByUsername(c, loginReq.Username)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user info"})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"token":   token,
+		"role":    user.Role,
 		"message": "Login successful",
 	})
 }

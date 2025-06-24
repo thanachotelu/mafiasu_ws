@@ -115,3 +115,7 @@ func (s *userService) UpdateUser(ctx context.Context, id string, user intModels.
 func (s *userService) DeleteUser(ctx context.Context, id string) (intModels.User, error) {
 	return s.repo.DeleteUser(ctx, id)
 }
+
+func (s *userService) GetUserByUsername(ctx context.Context, username string) (intModels.User, error) {
+	return s.repo.GetUserByUsername(ctx, username)
+}

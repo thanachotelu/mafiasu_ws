@@ -2,7 +2,6 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { authService } from '../services/authService';
-import NavBar1 from '../components/NavBar1.vue';
 
 const router = useRouter();
 const isLoading = ref(false);
@@ -30,9 +29,8 @@ const handleLogin = async (e) => {
     const response = await authService.login(formData.value);
     
     // Check if user has affiliate role
-    const user = response.user;
-    if (!user.roles?.includes('Affiliator')) {
-      error.value = 'Access denied. Affiliate account required.';
+    if (!response.role?.includes('Affiliator')) {
+      error.value = 'Access denied. Affiliator account required.';
       return;
     }
 
@@ -50,7 +48,6 @@ const togglePasswordVisibility = () => {
 </script>
 
 <template>
-  <NavBar1 />
   <div class="main-container">
     <!-- Add customer banner -->
     <div class="customer-banner">
