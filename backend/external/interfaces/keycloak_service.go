@@ -12,4 +12,5 @@ type KeycloakService interface {
 	GetRoleIDByName(roleName, token string) (string, error)
 	CreateRoleIfNotExists(roleName string) error
 	Login(ctx context.Context, username, password string) (string, error)
+	 CreateClientIfNotExists(clientID string) error
 }

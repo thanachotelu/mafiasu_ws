@@ -23,15 +23,21 @@ const handleLogin = async (e) => {
     return;
   }
 
+  
   isLoading.value = true;
   error.value = '';
 
+  
   try {
     const response = await authService.login(formData.value);
     
     // Check if user has user role instead of affiliate role
     const user = response.user;
    
+ if (!response.role?.includes('user')) {
+    error.value = 'Access denied. User account required.';
+    return;
+}
 
     router.push('/car-lists');
   } catch (err) {

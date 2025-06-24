@@ -32,6 +32,10 @@ const handleLogin = async (e) => {
     // Check if user has affiliate role
     const user = response.user;
     
+     if (!response.role?.includes('Affiliator')) {
+       error.value = 'Access denied. Affiliate account required.';
+       return;
+     }
 
     router.push('/dashboard');
   } catch (err) {

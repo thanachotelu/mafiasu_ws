@@ -278,3 +278,44 @@ func (s *KeycloakServices) Login(ctx context.Context, username, password string)
 
     return result.AccessToken, nil
 }
+func (s *KeycloakServices) CreateClientIfNotExists(clientID string) error {
+    token, err := s.GetAdminToken()
+    if err != nil {
+        return err
+    }
+    // เช็คว่ามี client นี้อยู่แล้วหรือยัง
+    url := fmt.Sprintf("%s/admin/realms/%s/clients?clientId=%s", s.cfg.BaseURL, s.cfg.Realm, clientID)
+    req, _ := http.NewRequest("GET", url, nil)
+    req.Header.Set("Authorization", "Bearer "+token)
+    resp, err := s.httpClient.Do(req)
+    if err != nil {
+        return err
+    }
+    defer resp.Body.Close()
+    var clients []interface{}
+    json.NewDecoder(resp.Body).Decode(&clients)
+    if len(clients) > 0 {
+        return nil // มีแล้ว
+    }
+    // ถ้ายังไม่มี ให้สร้างใหม่
+    createUrl := fmt.Sprintf("%s/admin/realms/%s/clients", s.cfg.BaseURL, s.cfg.Realm)
+    body := map[string]interface{}{
+        "clientId":                 clientID,
+        "enabled":                  true,
+        "publicClient":             true,
+        "directAccessGrantsEnabled": true,
+    }
+    b, _ := json.Marshal(body)
+    req, _ = http.NewRequest("POST", createUrl, bytes.NewReader(b))
+    req.Header.Set("Authorization", "Bearer "+token)
+    req.Header.Set("Content-Type", "application/json")
+    resp, err = s.httpClient.Do(req)
+    if err != nil {
+        return err
+    }
+    defer resp.Body.Close()
+    if resp.StatusCode != 201 && resp.StatusCode != 204 {
+        return fmt.Errorf("failed to create client: %s", resp.Status)
+    }
+    return nil
+}

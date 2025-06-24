@@ -15,14 +15,14 @@ export const authService = {
   async login(credentials) {
     try {
       const response = await axios.post(`${API_URL}/auth/login`, credentials);
-      const { token, user } = response.data;
+      const { token, user,role } = response.data;
       
       // Store the token
       localStorage.setItem("token", token);
       // Set the default Authorization header
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       
-      return { token, user };
+      return { token, user,role };
     } catch (error) {
       throw new Error(error.response?.data?.message || "Login failed");
     }

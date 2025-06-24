@@ -46,7 +46,7 @@ func main() {
 		log.Fatalf("failed to connect to database: %v", err)
 	}
 	defer db.Close()
-
+	
 	// User
 	userRepo := intRepo.NewUserRepository(db.GetPool())
 	kc := extService.NewKeycloakService(cfg.Keycloak)
@@ -70,6 +70,9 @@ func main() {
 	affiliateRepo := extRepo.NewAffiliateRepository(db.GetPool())
 	affiliateService := extService.NewAffiliateService(affiliateRepo)
 	waitForKeycloak(cfg.Keycloak.BaseURL)
+	if err := kc.CreateClientIfNotExists(cfg.Keycloak.ClientID); err != nil {
+        log.Fatalf("failed to create client: %v", err)
+    }
 	initializeRoles(kc)
 	r := gin.Default()
 

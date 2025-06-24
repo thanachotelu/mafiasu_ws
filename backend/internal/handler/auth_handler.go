@@ -20,24 +20,32 @@ func NewAuthHandler(userService interfaces.UserService, keycloakService interfac
 }
 
 func (h *AuthHandler) Login(c *gin.Context) {
-	var loginReq struct {
-		Username string `json:"username" binding:"required"`
-		Password string `json:"password" binding:"required"`
-	}
+    var loginReq struct {
+        Username string `json:"username" binding:"required"`
+        Password string `json:"password" binding:"required"`
+    }
 
-	if err := c.ShouldBindJSON(&loginReq); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
-		return
-	}
+    if err := c.ShouldBindJSON(&loginReq); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+        return
+    }
 
-	token, err := h.keycloakService.Login(c, loginReq.Username, loginReq.Password)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
-		return
-	}
+    token, err := h.keycloakService.Login(c, loginReq.Username, loginReq.Password)
+    if err != nil {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+        return
+    }
 
-	c.JSON(http.StatusOK, gin.H{
-		"token":   token,
-		"message": "Login successful",
-	})
+    // ดึง user จาก database เพื่อเอา role
+    user, err := h.userService.GetUserByUsername(c, loginReq.Username)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user info"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{
+        "token":   token,
+        "role":    user.Role,
+        "message": "Login successful",
+    })
 }
