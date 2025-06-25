@@ -1,4 +1,4 @@
-package handler
+package middleware
 
 import (
 	"mafiasu_ws/internal/interfaces"
@@ -24,7 +24,7 @@ func (h *MiddlewareHandler) AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		clientID, err := h.authRepo.ValidateAPIKey(c.Request.Context(), apiKey) 
+		clientID, err := h.authRepo.ValidateAPIKey(c.Request.Context(), apiKey)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid API Key"})
 			c.Abort()
@@ -45,7 +45,7 @@ func (h *MiddlewareHandler) LogMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		err := h.authRepo.LogRequest(c.Request.Context(), clientID.(int), c.Request.URL.Path, c.Request.Method) 
+		err := h.authRepo.LogRequest(c.Request.Context(), clientID.(int), c.Request.URL.Path, c.Request.Method)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not log request"})
 			c.Abort()

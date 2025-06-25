@@ -15,6 +15,7 @@ import (
 	_ "mafiasu_ws/docs" // This will be generated
 
 	extInterfaces "mafiasu_ws/external/interfaces"
+	extMiddleware "mafiasu_ws/external/middleware"
 	extRepo "mafiasu_ws/external/repository"
 	extRoutes "mafiasu_ws/external/routes"
 	extService "mafiasu_ws/external/services"
@@ -66,6 +67,10 @@ func main() {
 	// Auth
 	authHandler := intHandler.NewAuthHandler(userService, kc)
 
+	// Auth Repository for middleware (ใช้ Public Key จาก config)
+	authRepo := intRepo.NewAuthRepository(db.GetPool(), cfg.KeycloakPublicKey)
+	middlewareHandler := extMiddleware.NewMiddlewareHandler(authRepo)
+
 	// Affiliates
 	affiliateRepo := extRepo.NewAffiliateRepository(db.GetPool())
 	affiliateService := extService.NewAffiliateService(affiliateRepo)
@@ -92,7 +97,7 @@ func main() {
 	intRoutes.RegisterCarRoutes(r, carHandler)
 	intRoutes.RegisterBookingRoutes(r, bookingHandler)
 	intRoutes.RegisterAuthRoutes(r, authHandler)
-	extRoutes.RegisterAffiliateRoutes(r, affiliateService)
+	extRoutes.RegisterAffiliateRoutes(r, affiliateService, middlewareHandler)
 
 	if err := r.Run(":8000"); err != nil {
 		log.Fatalf("failed to start server: %v", err)
