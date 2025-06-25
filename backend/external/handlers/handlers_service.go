@@ -25,6 +25,7 @@ type Car struct {
 	CreatedAt         time.Time `db:"created_at" json:"created_at"`
 	UpdatedAt         time.Time `db:"updated_at" json:"updated_at"`
 }
+
 type BookingRequest struct {
 	BookID     string  `json:"book_id"`
 	UserID     string  `json:"user_id"`
