@@ -235,7 +235,7 @@ func (s *KeycloakServices) CreateRoleIfNotExists(roleName string) error {
 	return nil
 }
 
-func (s *KeycloakServices) Login(ctx context.Context, username, password string) (string, error) {
+func (s *KeycloakServices) Login(ctx context.Context, username, password string) (string, string, error) {
     urlStr := fmt.Sprintf("%s/realms/%s/protocol/openid-connect/token", s.BaseURL, s.Realm)
 
     form := url.Values{}
@@ -246,7 +246,7 @@ func (s *KeycloakServices) Login(ctx context.Context, username, password string)
 
     req, err := http.NewRequestWithContext(ctx, "POST", urlStr, bytes.NewBufferString(form.Encode()))
     if err != nil {
-        return "", fmt.Errorf("failed to create request: %w", err)
+        return "", "", fmt.Errorf("failed to create request: %w", err)
     }
     req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
@@ -254,29 +254,30 @@ func (s *KeycloakServices) Login(ctx context.Context, username, password string)
 
     resp, err := s.httpClient.Do(req)
     if err != nil {
-        return "", fmt.Errorf("failed to send request: %w", err)
+        return "", "", fmt.Errorf("failed to send request: %w", err)
     }
     defer resp.Body.Close()
 
     bodyBytes, err := io.ReadAll(resp.Body)
     if err != nil {
-        return "", fmt.Errorf("failed to read response body: %w", err)
+        return "", "", fmt.Errorf("failed to read response body: %w", err)
     }
 
     if resp.StatusCode != http.StatusOK {
         log.Printf("Login failed. Status: %d, Body: %s", resp.StatusCode, string(bodyBytes))
-        return "", fmt.Errorf("authentication failed with status: %d", resp.StatusCode)
+        return "", "", fmt.Errorf("authentication failed with status: %d", resp.StatusCode)
     }
 
     var result struct {
-        AccessToken string `json:"access_token"`
+        AccessToken  string `json:"access_token"`
+        RefreshToken string `json:"refresh_token"`
     }
 
     if err := json.NewDecoder(bytes.NewReader(bodyBytes)).Decode(&result); err != nil {
-        return "", fmt.Errorf("failed to decode response: %w", err)
+        return "", "", fmt.Errorf("failed to decode response: %w", err)
     }
 
-    return result.AccessToken, nil
+    return result.AccessToken, result.RefreshToken, nil
 }
 func (s *KeycloakServices) CreateClientIfNotExists(clientID string) error {
     token, err := s.GetAdminToken()
@@ -318,4 +319,45 @@ func (s *KeycloakServices) CreateClientIfNotExists(clientID string) error {
         return fmt.Errorf("failed to create client: %s", resp.Status)
     }
     return nil
+}
+func (s *KeycloakServices) RefreshToken(ctx context.Context, refreshToken string) (string, string, error) {
+    urlStr := fmt.Sprintf("%s/realms/%s/protocol/openid-connect/token", s.BaseURL, s.Realm)
+
+    form := url.Values{}
+    form.Set("grant_type", "refresh_token")
+    form.Set("client_id", s.cfg.ClientID)
+    form.Set("refresh_token", refreshToken)
+
+    req, err := http.NewRequestWithContext(ctx, "POST", urlStr, bytes.NewBufferString(form.Encode()))
+    if err != nil {
+        return "", "", fmt.Errorf("failed to create request: %w", err)
+    }
+    req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+    resp, err := s.httpClient.Do(req)
+    if err != nil {
+        return "", "", fmt.Errorf("failed to send request: %w", err)
+    }
+    defer resp.Body.Close()
+
+    bodyBytes, err := io.ReadAll(resp.Body)
+    if err != nil {
+        return "", "", fmt.Errorf("failed to read response body: %w", err)
+    }
+
+    if resp.StatusCode != http.StatusOK {
+        log.Printf("Refresh token failed. Status: %d, Body: %s", resp.StatusCode, string(bodyBytes))
+        return "", "", fmt.Errorf("refresh failed with status: %d", resp.StatusCode)
+    }
+
+    var result struct {
+        AccessToken  string `json:"access_token"`
+        RefreshToken string `json:"refresh_token"`
+    }
+
+    if err := json.NewDecoder(bytes.NewReader(bodyBytes)).Decode(&result); err != nil {
+        return "", "", fmt.Errorf("failed to decode response: %w", err)
+    }
+
+    return result.AccessToken, result.RefreshToken, nil
 }

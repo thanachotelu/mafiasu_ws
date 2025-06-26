@@ -30,9 +30,9 @@ const handleLogin = async (e) => {
     const response = await authService.login(formData.value);
     
     // Check if user has affiliate role
-    const user = response.user;
     
-     if (!response.role?.includes('Affiliator')) {
+    console.log(response.roles);
+     if (!response.roles?.includes('Affiliator')) {
        error.value = 'Access denied. Affiliate account required.';
        return;
      }

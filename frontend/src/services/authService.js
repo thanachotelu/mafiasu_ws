@@ -13,20 +13,21 @@ export const authService = {
   },
 
   async login(credentials) {
-    try {
-      const response = await axios.post(`${API_URL}/auth/login`, credentials);
-      const { token, user,role } = response.data;
-      
-      // Store the token
-      localStorage.setItem("token", token);
-      // Set the default Authorization header
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      
-      return { token, user,role };
-    } catch (error) {
-      throw new Error(error.response?.data?.message || "Login failed");
-    }
-  },
+  try {
+    const response = await axios.post(`${API_URL}/auth/login`, credentials);
+    const { token, refresh_token, roles } = response.data; // <-- ต้องเป็น roles (array)
+    
+    // Store the token
+    localStorage.setItem("token", token);
+    // Set the default Authorization header
+    localStorage.setItem("refresh_token", refresh_token);
+    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    
+    return { token, refresh_token, roles }; // <-- return roles
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Login failed");
+  }
+},
 
   isAuthenticated() {
     const token = localStorage.getItem("token");
