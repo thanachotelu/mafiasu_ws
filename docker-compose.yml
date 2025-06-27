@@ -20,7 +20,7 @@ services:
       - db
     volumes:
       - ./public.pem:/app/public.pem:ro
-      
+
   db:
     build:
       context: ./database/postgresql-db
