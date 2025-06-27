@@ -2,6 +2,8 @@ package config
 
 import (
 	"fmt"
+	"log"
+	"os"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -30,9 +32,14 @@ func New() (*Config, error) {
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
+	pemPath := viper.GetString("KEYCLOAK_PUBLIC_KEY_PATH")
+	pemBytes, err := os.ReadFile(pemPath)
+	if err != nil {
+		log.Fatalf("Failed to load public key: %v", err)
+	}
 	cfg := &Config{
 		AppPort:           viper.GetString("APP_PORT"),
-		KeycloakPublicKey: viper.GetString("KEYCLOAK_PUBLIC_KEY"),
+		KeycloakPublicKey: string(pemBytes),
 		Keycloak: KeycloakConfig{
 			BaseURL:       viper.GetString("KEYCLOAK_BASE_URL"),
 			Realm:         viper.GetString("KEYCLOAK_REALM"),

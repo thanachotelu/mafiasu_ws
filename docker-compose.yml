@@ -18,7 +18,9 @@ services:
     restart: unless-stopped
     depends_on:
       - db
-
+    volumes:
+      - ./public.pem:/app/public.pem:ro
+      
   db:
     build:
       context: ./database/postgresql-db

@@ -39,27 +39,26 @@ export const authService = {
 
   async login(credentials) {
     try {
-      const response = await axios.post(`${API_URL}/auth/login`, credentials);
-      const { token, user, role } = response.data;
-      
-      // Store the token, user, and role
-      localStorage.setItem("token", token);
-      localStorage.setItem("userRole", role);
-      localStorage.setItem("currentUser", JSON.stringify(user));
-      
-      // Set the default Authorization header
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      
-      // Update reactive states
-      isAuthenticated.value = true;
-      userRole.value = role;
-      currentUser.value = user;
-      
-      return { token, user, role };
-    } catch (error) {
-      throw new Error(error.response?.data?.message || "Login failed");
+    const response = await axios.post(`${API_URL}/auth/login`, credentials);
+    const { token, refresh_token, roles } = response.data;
+
+    localStorage.setItem("token", token);
+    localStorage.setItem("refresh_token", refresh_token);
+
+    // เพิ่มบรรทัดนี้เพื่อเก็บ role (เช่น role แรก หรือจะเก็บทั้ง array ก็ได้)
+    if (roles && roles.length > 0) {
+      localStorage.setItem("userRole", roles[0]);
+    } else {
+      localStorage.removeItem("userRole");
     }
-  },
+
+    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    
+    return { token, refresh_token, roles }; // <-- return roles
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Login failed");
+  }
+},
 
   isAuthenticated() {
     const token = localStorage.getItem("token");

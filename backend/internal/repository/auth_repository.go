@@ -1,13 +1,17 @@
 package repository
 
 import (
+	"context"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
+	"errors"
 	"fmt"
+	"log"
+
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"context"
 )
 
 type AuthRepository struct {
@@ -17,23 +21,21 @@ type AuthRepository struct {
 
 // NewAuthRepository constructor สำหรับสร้าง authRepository
 func NewAuthRepository(db *pgxpool.Pool, pubKey string) *AuthRepository {
+	if db == nil {
+		log.Println("🚨 DB pool is nil!")
+	}
 	return &AuthRepository{
 		db:           db,
 		publicKeyPEM: pubKey, // รับค่า Public Key
 	}
 }
 
-// ValidateAPIKey ใช้ในการตรวจสอบ API Key
-func (r *AuthRepository) ValidateAPIKey(ctx context.Context, apiKey string) (int, error) {
-	var clientID int
-	err := r.db.QueryRow(ctx, "SELECT id FROM clients WHERE api_key = $1", apiKey).Scan(&clientID)
-	return clientID, err
-}
-
 // LogRequest ใช้ในการบันทึกการเรียก API
-func (r *AuthRepository) LogRequest(ctx context.Context, clientID int, endpoint string, method string) error {
-	_, err := r.db.Exec(ctx, "INSERT INTO logs (client_id, endpoint, method) VALUES ($1, $2, $3)",
-		clientID, endpoint, method)
+func (r *AuthRepository) LogRequest(ctx context.Context, clientID *int, userID *string, endpoint string, method string) error {
+	_, err := r.db.Exec(ctx,
+		`INSERT INTO logs (client_id, user_id, endpoint, method) 
+		 VALUES ($1, $2, $3, $4)`,
+		clientID, userID, endpoint, method)
 	return err
 }
 
@@ -62,6 +64,7 @@ func (r *AuthRepository) ValidateJWTToken(ctx context.Context, tokenString strin
 		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
+
 		return rsaPublicKey, nil
 	})
 
@@ -71,8 +74,23 @@ func (r *AuthRepository) ValidateJWTToken(ctx context.Context, tokenString strin
 
 	// ตรวจสอบว่า token ถูกต้องและ extract claims
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		log.Println("Raw token:", tokenString)
+		log.Printf("Decoded claims: %+v\n", claims)
+		log.Println("Token valid:", token.Valid)
 		return claims, nil
 	}
 
 	return nil, fmt.Errorf("invalid token")
+}
+
+func (r *AuthRepository) ValidateAPIKey(ctx context.Context, apikey string) (int, error) {
+	var clientID int
+	err := r.db.QueryRow(ctx, "select id from clients where api_key = $1", apikey).Scan(&clientID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return 0, fmt.Errorf("API key not found")
+		}
+		return 0, err
+	}
+	return clientID, nil
 }

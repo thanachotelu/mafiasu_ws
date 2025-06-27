@@ -15,6 +15,7 @@ import (
 	_ "mafiasu_ws/docs" // This will be generated
 
 	extInterfaces "mafiasu_ws/external/interfaces"
+	extMiddleware "mafiasu_ws/external/middleware"
 	extRepo "mafiasu_ws/external/repository"
 	extRoutes "mafiasu_ws/external/routes"
 	extService "mafiasu_ws/external/services"
@@ -47,27 +48,37 @@ func main() {
 	}
 	defer db.Close()
 
+	dbPool := db.GetPool()
 	// User
-	userRepo := intRepo.NewUserRepository(db.GetPool())
+	userRepo := intRepo.NewUserRepository(dbPool)
 	kc := extService.NewKeycloakService(cfg.Keycloak)
 	userService := intService.NewUserService(userRepo, kc)
 	userHandler := intHandler.NewUserHandler(userService)
 
 	// Car
-	carRepo := intRepo.NewCarRepository(db.GetPool())
+	carRepo := intRepo.NewCarRepository(dbPool)
 	carService := intService.NewCarService(carRepo)
 	carHandler := intHandler.NewCarHandler(carService)
 
 	// Booking
-	bookingRepo := intRepo.NewBookingRepository(db.GetPool())
+	bookingRepo := intRepo.NewBookingRepository(dbPool)
 	bookingService := intService.NewBookingService(bookingRepo)
 	bookingHandler := intHandler.NewBookingHandler(bookingService)
 
 	// Auth
 	authHandler := intHandler.NewAuthHandler(userService, kc)
 
+	// Auth Repository for middleware (ใช้ Public Key จาก config)
+	authRepo := intRepo.NewAuthRepository(dbPool, cfg.KeycloakPublicKey)
+	middlewareHandler := extMiddleware.NewMiddlewareHandler(authRepo)
+
+	//Client
+	clientRepo := intRepo.NewClientRepository(dbPool)
+	clientService := intService.NewClientService(clientRepo)
+	clientHandler := intHandler.NewClientHandler(clientService)
+
 	// Affiliates
-	affiliateRepo := extRepo.NewAffiliateRepository(db.GetPool())
+	affiliateRepo := extRepo.NewAffiliateRepository(dbPool)
 	affiliateService := extService.NewAffiliateService(affiliateRepo)
 	waitForKeycloak(cfg.Keycloak.BaseURL)
 	if err := kc.CreateClientIfNotExists(cfg.Keycloak.ClientID); err != nil {
@@ -95,7 +106,8 @@ func main() {
 	intRoutes.RegisterCarRoutes(r, carHandler)
 	intRoutes.RegisterBookingRoutes(r, bookingHandler)
 	intRoutes.RegisterAuthRoutes(r, authHandler)
-	extRoutes.RegisterAffiliateRoutes(r, affiliateService)
+	intRoutes.RegisterClientRoutes(r, clientHandler)
+	extRoutes.RegisterAffiliateRoutes(r, affiliateService, middlewareHandler)
 
 	if err := r.Run(":8000"); err != nil {
 		log.Fatalf("failed to start server: %v", err)

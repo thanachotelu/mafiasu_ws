@@ -7,8 +7,9 @@ import (
 
 // AuthRepository handles logging and API key validation
 type AuthRepository interface {
+	LogRequest(ctx context.Context, clientID *int, userID *string, endpoint, method string) error
+	ValidateJWTToken(ctx context.Context, token string) (map[string]interface{}, error)
 	ValidateAPIKey(ctx context.Context, apiKey string) (int, error)
-	LogRequest(ctx context.Context, clientID int, endpoint, method string) error
 }
 
 // KeycloakService defines methods for user management in Keycloak
@@ -17,5 +18,6 @@ type AuthRepository interface {
 type KeycloakService interface {
 	// CreateUser(ctx context.Context, req keycloak.CreateUserRequest) error
 	AssignRole(ctx context.Context, userID, roleName string) error
-	Login(ctx context.Context, username, password string) (string, error)
+	Login(ctx context.Context, username, password string) (string, string, error)
+	RefreshToken(ctx context.Context, refreshToken string) (string, string, error)
 }

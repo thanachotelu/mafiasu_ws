@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 type AuthHandler struct {
@@ -30,22 +31,95 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := h.keycloakService.Login(c, loginReq.Username, loginReq.Password)
+	token, refreshToken, err := h.keycloakService.Login(c, loginReq.Username, loginReq.Password)
+	//         ^^^^ รับ refreshToken ไว้ (หรือใช้ _ ถ้ายังไม่ใช้)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}
 
-	// ดึง user จาก database เพื่อเอา role
-	user, err := h.userService.GetUserByUsername(c, loginReq.Username)
+	parsed, _, err := new(jwt.Parser).ParseUnverified(token, jwt.MapClaims{})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user info"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse token"})
 		return
+	}
+	claims := parsed.Claims.(jwt.MapClaims)
+	roles := []string{}
+	if realmAccess, ok := claims["realm_access"].(map[string]interface{}); ok {
+		if r, ok := realmAccess["roles"].([]interface{}); ok {
+			for _, v := range r {
+				if roleStr, ok := v.(string); ok {
+					roles = append(roles, roleStr)
+				}
+			}
+		}
+	}
+
+	validRoles := map[string]bool{
+		"user":       true,
+		"Affiliator": true,
+		"admin":      true,
+	}
+
+	filteredRoles := []string{}
+	for _, role := range roles {
+		if validRoles[role] {
+			filteredRoles = append(filteredRoles, role)
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"token":   token,
-		"role":    user.Role,
-		"message": "Login successful",
+		"token":         token,
+		"refresh_token": refreshToken, // เพิ่มบรรทัดนี้
+		"roles":         filteredRoles,
+		"message":       "Login successful",
+	})
+}
+func (h *AuthHandler) RefreshToken(c *gin.Context) {
+	var req struct {
+		RefreshToken string `json:"refresh_token" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+	token, refreshToken, err := h.keycloakService.RefreshToken(c, req.RefreshToken)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid refresh token"})
+		return
+	}
+	// decode roles จาก token ใหม่ (เหมือน login)
+	parsed, _, err := new(jwt.Parser).ParseUnverified(token, jwt.MapClaims{})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse token"})
+		return
+	}
+	claims := parsed.Claims.(jwt.MapClaims)
+	roles := []string{}
+	if realmAccess, ok := claims["realm_access"].(map[string]interface{}); ok {
+		if r, ok := realmAccess["roles"].([]interface{}); ok {
+			for _, v := range r {
+				if roleStr, ok := v.(string); ok {
+					roles = append(roles, roleStr)
+				}
+			}
+		}
+	}
+	validRoles := map[string]bool{
+		"user":       true,
+		"Affiliator": true,
+		"admin":      true,
+	}
+	filteredRoles := []string{}
+	for _, role := range roles {
+		if validRoles[role] {
+			filteredRoles = append(filteredRoles, role)
+		}
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"token":         token,
+		"refresh_token": refreshToken,
+		"roles":         filteredRoles,
+		"message":       "Token refreshed",
 	})
 }
