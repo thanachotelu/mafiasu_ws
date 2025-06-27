@@ -8,6 +8,7 @@ import CarLists from '../pages/CarLists.vue';
 import Dashboard from '../pages/Dashboard.vue';
 import CarDetail from '../pages/CarDetail.vue';
 import APIList from '../pages/ApiLists.vue';
+import GetApiKey from '../pages/GetApiKey.vue';
 
 import ShortRent from '../pages/ShortRent.vue';
 import LongRent from '../pages/LongRent.vue';
@@ -80,6 +81,11 @@ const routes = [
     path: '/api-lists',
     name: 'APIs Documentation',
     component: APIList,
+  },
+  {
+    path: '/get-api-key',
+    name: 'GetApiKey',
+    component: GetApiKey,
   },
 ];
 
