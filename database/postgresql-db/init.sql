@@ -99,22 +99,20 @@ CREATE TABLE booking (
 CREATE TABLE clients (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
-    email TEXT UNIQUE NOT NULL,
+    email TEXT NOT NULL,
     api_key TEXT UNIQUE NOT NULL
 );
 
+ALTER TABLE clients ADD COLUMN revoked BOOLEAN default false;
+
 CREATE TABLE logs (
     id SERIAL PRIMARY KEY,
-    client_id INT NOT NULL,
+    client_id INT,
+    user_id text,
     endpoint TEXT NOT NULL,
     method TEXT NOT NULL,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (client_id) REFERENCES clients(id)
-);
-
-CREATE TABLE data (
-    id SERIAL PRIMARY KEY,
-    content TEXT NOT NULL
 );
 
 CREATE TABLE carimages (

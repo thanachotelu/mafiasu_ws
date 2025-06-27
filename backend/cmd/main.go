@@ -48,19 +48,20 @@ func main() {
 	}
 	defer db.Close()
 
+	dbPool := db.GetPool()
 	// User
-	userRepo := intRepo.NewUserRepository(db.GetPool())
+	userRepo := intRepo.NewUserRepository(dbPool)
 	kc := extService.NewKeycloakService(cfg.Keycloak)
 	userService := intService.NewUserService(userRepo, kc)
 	userHandler := intHandler.NewUserHandler(userService)
 
 	// Car
-	carRepo := intRepo.NewCarRepository(db.GetPool())
+	carRepo := intRepo.NewCarRepository(dbPool)
 	carService := intService.NewCarService(carRepo)
 	carHandler := intHandler.NewCarHandler(carService)
 
 	// Booking
-	bookingRepo := intRepo.NewBookingRepository(db.GetPool())
+	bookingRepo := intRepo.NewBookingRepository(dbPool)
 	bookingService := intService.NewBookingService(bookingRepo)
 	bookingHandler := intHandler.NewBookingHandler(bookingService)
 
@@ -68,11 +69,16 @@ func main() {
 	authHandler := intHandler.NewAuthHandler(userService, kc)
 
 	// Auth Repository for middleware (ใช้ Public Key จาก config)
-	authRepo := intRepo.NewAuthRepository(db.GetPool(), cfg.KeycloakPublicKey)
+	authRepo := intRepo.NewAuthRepository(dbPool, cfg.KeycloakPublicKey)
 	middlewareHandler := extMiddleware.NewMiddlewareHandler(authRepo)
 
+	//Client
+	clientRepo := intRepo.NewClientRepository(dbPool)
+	clientService := intService.NewClientService(clientRepo)
+	clientHandler := intHandler.NewClientHandler(clientService)
+
 	// Affiliates
-	affiliateRepo := extRepo.NewAffiliateRepository(db.GetPool())
+	affiliateRepo := extRepo.NewAffiliateRepository(dbPool)
 	affiliateService := extService.NewAffiliateService(affiliateRepo)
 	waitForKeycloak(cfg.Keycloak.BaseURL)
 	if err := kc.CreateClientIfNotExists(cfg.Keycloak.ClientID); err != nil {
@@ -100,6 +106,7 @@ func main() {
 	intRoutes.RegisterCarRoutes(r, carHandler)
 	intRoutes.RegisterBookingRoutes(r, bookingHandler)
 	intRoutes.RegisterAuthRoutes(r, authHandler)
+	intRoutes.RegisterClientRoutes(r, clientHandler)
 	extRoutes.RegisterAffiliateRoutes(r, affiliateService, middlewareHandler)
 
 	if err := r.Run(":8000"); err != nil {
