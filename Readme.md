@@ -1,6 +1,7 @@
 # Front-end side
 
 เริ่มใช้งานโดย 
+
 0. cd mafiasu_ws
 1. cd frontend
 2. npm install
@@ -11,6 +12,7 @@
 # Back-end + Database side
 
 เริ่มใช้งานโดย 
+
 0. cd mafiasu_ws
 1. รัน docker ด้วย docker-compose up -d --build
-2. รอระบบสร้างและเริ่ม 
+2. รอdockerสร้างและเริ่มระบบ
