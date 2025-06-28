@@ -31,48 +31,52 @@ func (h *AuthHandler) Login(c *gin.Context) {
     }
 
     token, refreshToken, err := h.keycloakService.Login(c, loginReq.Username, loginReq.Password)
-//         ^^^^ รับ refreshToken ไว้ (หรือใช้ _ ถ้ายังไม่ใช้)
-if err != nil {
-    c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
-    return
-}
+    if err != nil {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+        return
+    }
 
-   parsed, _, err := new(jwt.Parser).ParseUnverified(token, jwt.MapClaims{})
-if err != nil {
-    c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse token"})
-    return
-}
-claims := parsed.Claims.(jwt.MapClaims)
-roles := []string{}
-if realmAccess, ok := claims["realm_access"].(map[string]interface{}); ok {
-    if r, ok := realmAccess["roles"].([]interface{}); ok {
-        for _, v := range r {
-            if roleStr, ok := v.(string); ok {
-                roles = append(roles, roleStr)
+    parsed, _, err := new(jwt.Parser).ParseUnverified(token, jwt.MapClaims{})
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse token"})
+        return
+    }
+    claims := parsed.Claims.(jwt.MapClaims)
+
+    // ดึง user_id จาก claims["sub"]
+    userID, _ := claims["sub"].(string)
+
+    roles := []string{}
+    if realmAccess, ok := claims["realm_access"].(map[string]interface{}); ok {
+        if r, ok := realmAccess["roles"].([]interface{}); ok {
+            for _, v := range r {
+                if roleStr, ok := v.(string); ok {
+                    roles = append(roles, roleStr)
+                }
             }
         }
     }
-}
 
-validRoles := map[string]bool{
-    "user":       true,
-    "Affiliator": true,
-    "admin":      true,
-}
-
-filteredRoles := []string{}
-for _, role := range roles {
-    if validRoles[role] {
-        filteredRoles = append(filteredRoles, role)
+    validRoles := map[string]bool{
+        "user":       true,
+        "Affiliator": true,
+        "admin":      true,
     }
-}
 
-c.JSON(http.StatusOK, gin.H{
-    "token":   token,
-    "refresh_token": refreshToken, // เพิ่มบรรทัดนี้
-    "roles":   filteredRoles,
-    "message": "Login successful",
-})
+    filteredRoles := []string{}
+    for _, role := range roles {
+        if validRoles[role] {
+            filteredRoles = append(filteredRoles, role)
+        }
+    }
+
+    c.JSON(http.StatusOK, gin.H{
+        "token":         token,
+        "refresh_token": refreshToken,
+        "user_id":       userID, // <-- เพิ่มตรงนี้
+        "roles":         filteredRoles,
+        "message":       "Login successful",
+    })
 }
 func (h *AuthHandler) RefreshToken(c *gin.Context) {
     var req struct {
@@ -87,13 +91,14 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
         c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid refresh token"})
         return
     }
-    // decode roles จาก token ใหม่ (เหมือน login)
     parsed, _, err := new(jwt.Parser).ParseUnverified(token, jwt.MapClaims{})
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse token"})
         return
     }
     claims := parsed.Claims.(jwt.MapClaims)
+    userID, _ := claims["sub"].(string) // <-- เพิ่มตรงนี้
+
     roles := []string{}
     if realmAccess, ok := claims["realm_access"].(map[string]interface{}); ok {
         if r, ok := realmAccess["roles"].([]interface{}); ok {
@@ -118,6 +123,7 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
     c.JSON(http.StatusOK, gin.H{
         "token":         token,
         "refresh_token": refreshToken,
+        "user_id":       userID, // <-- เพิ่มตรงนี้
         "roles":         filteredRoles,
         "message":       "Token refreshed",
     })
