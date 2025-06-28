@@ -28,11 +28,15 @@ const handleLogin = async (e) => {
   try {
     const response = await authService.login(formData.value);
     
-    // Check if user has affiliate role
-    if (!response.role?.includes('Affiliator')) {
+    console.log(response.roles);
+    if (!response.roles?.includes('Affiliator')) {
       error.value = 'Access denied. Affiliator account required.';
       return;
     }
+
+    localStorage.setItem('username', formData.value.username);
+
+    authService.isAuthenticated(); // sync ค่า userRole/isAuthenticated
 
     router.push('/dashboard');
   } catch (err) {

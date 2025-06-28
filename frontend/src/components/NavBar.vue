@@ -8,6 +8,7 @@
       
       <RouterLink to="/" class="nav-link">Home</RouterLink>
       <RouterLink to="/car-lists" class="nav-link">Car Listing</RouterLink>
+      <RouterLink to="/get-api-key" class="nav-link">Get API Key</RouterLink>
 
       <!-- Links when NOT logged in -->
       <template v-if="!isAuthenticated">
