@@ -56,3 +56,19 @@ func (h *ClientHandler) RevokeClient(c *gin.Context) {
 		"message": "API key revoked",
 	})
 }
+
+func (h *ClientHandler) GetUserLogs(c *gin.Context) {
+	userID := c.Param("user_id")
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id required"})
+		return
+	}
+
+	logs, err := h.clientService.GetLogs(c.Request.Context(), userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to retrieve logs"})
+		return
+	}
+
+	c.JSON(http.StatusOK, logs)
+}

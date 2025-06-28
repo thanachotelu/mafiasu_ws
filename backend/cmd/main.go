@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -69,7 +70,8 @@ func main() {
 	authHandler := intHandler.NewAuthHandler(userService, kc)
 
 	// Auth Repository for middleware (ใช้ Public Key จาก config)
-	authRepo := intRepo.NewAuthRepository(dbPool, cfg.KeycloakPublicKey)
+	jwksURL := fmt.Sprintf("%s/realms/%s/protocol/openid-connect/certs", cfg.Keycloak.BaseURL, cfg.Keycloak.Realm)
+	authRepo := intRepo.NewAuthRepository(dbPool, jwksURL)
 	middlewareHandler := extMiddleware.NewMiddlewareHandler(authRepo)
 
 	//Client

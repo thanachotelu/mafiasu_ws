@@ -13,6 +13,7 @@ func RegisterClientRoutes(r *gin.Engine, clientHandler *handler.ClientHandler) {
 		{
 			client.POST("/create", clientHandler.CreateClient)
 			client.POST("/revoke", clientHandler.RevokeClient)
+			client.GET("/getlogs/:user_id", clientHandler.GetUserLogs)
 		}
 	}
 }

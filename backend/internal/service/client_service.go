@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"mafiasu_ws/internal/interfaces"
+	"mafiasu_ws/internal/models"
 )
 
 type clientService struct {
@@ -19,4 +20,8 @@ func (s *clientService) CreateClient(ctx context.Context, name, email string) (s
 
 func (s *clientService) RevokeClient(ctx context.Context, apiKey string) error {
 	return s.repo.RevokeClient(ctx, apiKey)
+}
+
+func (s *clientService) GetLogs(ctx context.Context, userID string) ([]models.Log, error) {
+	return s.repo.GetLogs(ctx, userID)
 }

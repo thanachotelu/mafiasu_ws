@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"mafiasu_ws/internal/models"
 	"mafiasu_ws/internal/utils"
 
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -50,4 +51,29 @@ func (r *clientRepository) RevokeClient(ctx context.Context, apiKey string) erro
 		return fmt.Errorf("API key not found")
 	}
 	return nil
+}
+
+func (r *clientRepository) GetLogs(ctx context.Context, userID string) ([]models.Log, error) {
+	rows, err := r.db.Query(ctx, `
+		select user_id, endpoint, method, timestamp
+		from logs
+		where user_id = $1
+		order by timestamp desc
+		limit 10
+	`, userID)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var logs []models.Log
+	for rows.Next() {
+		var log models.Log
+		if err := rows.Scan(&log.Endpoint, &log.Method, &log.Timestamp); err != nil {
+			return nil, err
+		}
+		logs = append(logs, log)
+	}
+	return logs, nil
 }
