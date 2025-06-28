@@ -70,7 +70,7 @@ func (r *clientRepository) GetLogs(ctx context.Context, userID string) ([]models
 	var logs []models.Log
 	for rows.Next() {
 		var log models.Log
-		if err := rows.Scan(&log.Endpoint, &log.Method, &log.Timestamp); err != nil {
+		if err := rows.Scan(&log.UserID, &log.Endpoint, &log.Method, &log.Timestamp); err != nil {
 			return nil, err
 		}
 		logs = append(logs, log)
