@@ -40,7 +40,8 @@ export const authService = {
   async login(credentials) {
     try {
     const response = await axios.post(`${API_URL}/auth/login`, credentials);
-    const { token, refresh_token, roles } = response.data;
+     const { token, refresh_token, roles, user_id } = response.data; // <-- ต้องเป็น roles (array)
+      localStorage.setItem("user_id", user_id);
 
     localStorage.setItem("token", token);
     localStorage.setItem("refresh_token", refresh_token);

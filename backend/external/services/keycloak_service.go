@@ -5,13 +5,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"io"
 	"log"
 	"mafiasu_ws/config"
 	"mafiasu_ws/external/interfaces"
 	"mafiasu_ws/external/models"
 	"net/http"
-	"net/url"
 	"time"
 )
 
@@ -236,128 +236,128 @@ func (s *KeycloakServices) CreateRoleIfNotExists(roleName string) error {
 }
 
 func (s *KeycloakServices) Login(ctx context.Context, username, password string) (string, string, error) {
-	urlStr := fmt.Sprintf("%s/realms/%s/protocol/openid-connect/token", s.BaseURL, s.Realm)
+    urlStr := fmt.Sprintf("%s/realms/%s/protocol/openid-connect/token", s.BaseURL, s.Realm)
 
-	form := url.Values{}
-	form.Set("grant_type", "password")
-	form.Set("client_id", s.cfg.ClientID)
-	form.Set("username", username)
-	form.Set("password", password)
+    form := url.Values{}
+    form.Set("grant_type", "password")
+    form.Set("client_id", s.cfg.ClientID)
+    form.Set("username", username)
+    form.Set("password", password)
 
-	req, err := http.NewRequestWithContext(ctx, "POST", urlStr, bytes.NewBufferString(form.Encode()))
-	if err != nil {
-		return "", "", fmt.Errorf("failed to create request: %w", err)
-	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+    req, err := http.NewRequestWithContext(ctx, "POST", urlStr, bytes.NewBufferString(form.Encode()))
+    if err != nil {
+        return "", "", fmt.Errorf("failed to create request: %w", err)
+    }
+    req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	log.Printf("Attempting login for user: %s", username)
+    log.Printf("Attempting login for user: %s", username)
 
-	resp, err := s.httpClient.Do(req)
-	if err != nil {
-		return "", "", fmt.Errorf("failed to send request: %w", err)
-	}
-	defer resp.Body.Close()
+    resp, err := s.httpClient.Do(req)
+    if err != nil {
+        return "", "", fmt.Errorf("failed to send request: %w", err)
+    }
+    defer resp.Body.Close()
 
-	bodyBytes, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", "", fmt.Errorf("failed to read response body: %w", err)
-	}
+    bodyBytes, err := io.ReadAll(resp.Body)
+    if err != nil {
+        return "", "", fmt.Errorf("failed to read response body: %w", err)
+    }
 
-	if resp.StatusCode != http.StatusOK {
-		log.Printf("Login failed. Status: %d, Body: %s", resp.StatusCode, string(bodyBytes))
-		return "", "", fmt.Errorf("authentication failed with status: %d", resp.StatusCode)
-	}
+    if resp.StatusCode != http.StatusOK {
+        log.Printf("Login failed. Status: %d, Body: %s", resp.StatusCode, string(bodyBytes))
+        return "", "", fmt.Errorf("authentication failed with status: %d", resp.StatusCode)
+    }
 
-	var result struct {
-		AccessToken  string `json:"access_token"`
-		RefreshToken string `json:"refresh_token"`
-	}
+    var result struct {
+        AccessToken  string `json:"access_token"`
+        RefreshToken string `json:"refresh_token"`
+    }
 
-	if err := json.NewDecoder(bytes.NewReader(bodyBytes)).Decode(&result); err != nil {
-		return "", "", fmt.Errorf("failed to decode response: %w", err)
-	}
+    if err := json.NewDecoder(bytes.NewReader(bodyBytes)).Decode(&result); err != nil {
+        return "", "", fmt.Errorf("failed to decode response: %w", err)
+    }
 
-	return result.AccessToken, result.RefreshToken, nil
+    return result.AccessToken, result.RefreshToken, nil
 }
 func (s *KeycloakServices) CreateClientIfNotExists(clientID string) error {
-	token, err := s.GetAdminToken()
-	if err != nil {
-		return err
-	}
-	// เช็คว่ามี client นี้อยู่แล้วหรือยัง
-	url := fmt.Sprintf("%s/admin/realms/%s/clients?clientId=%s", s.cfg.BaseURL, s.cfg.Realm, clientID)
-	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-	resp, err := s.httpClient.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	var clients []interface{}
-	json.NewDecoder(resp.Body).Decode(&clients)
-	if len(clients) > 0 {
-		return nil // มีแล้ว
-	}
-	// ถ้ายังไม่มี ให้สร้างใหม่
-	createUrl := fmt.Sprintf("%s/admin/realms/%s/clients", s.cfg.BaseURL, s.cfg.Realm)
-	body := map[string]interface{}{
-		"clientId":                  clientID,
-		"enabled":                   true,
-		"publicClient":              true,
-		"directAccessGrantsEnabled": true,
-	}
-	b, _ := json.Marshal(body)
-	req, _ = http.NewRequest("POST", createUrl, bytes.NewReader(b))
-	req.Header.Set("Authorization", "Bearer "+token)
-	req.Header.Set("Content-Type", "application/json")
-	resp, err = s.httpClient.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != 201 && resp.StatusCode != 204 {
-		return fmt.Errorf("failed to create client: %s", resp.Status)
-	}
-	return nil
+    token, err := s.GetAdminToken()
+    if err != nil {
+        return err
+    }
+    // เช็คว่ามี client นี้อยู่แล้วหรือยัง
+    url := fmt.Sprintf("%s/admin/realms/%s/clients?clientId=%s", s.cfg.BaseURL, s.cfg.Realm, clientID)
+    req, _ := http.NewRequest("GET", url, nil)
+    req.Header.Set("Authorization", "Bearer "+token)
+    resp, err := s.httpClient.Do(req)
+    if err != nil {
+        return err
+    }
+    defer resp.Body.Close()
+    var clients []interface{}
+    json.NewDecoder(resp.Body).Decode(&clients)
+    if len(clients) > 0 {
+        return nil // มีแล้ว
+    }
+    // ถ้ายังไม่มี ให้สร้างใหม่
+    createUrl := fmt.Sprintf("%s/admin/realms/%s/clients", s.cfg.BaseURL, s.cfg.Realm)
+    body := map[string]interface{}{
+        "clientId":                 clientID,
+        "enabled":                  true,
+        "publicClient":             true,
+        "directAccessGrantsEnabled": true,
+    }
+    b, _ := json.Marshal(body)
+    req, _ = http.NewRequest("POST", createUrl, bytes.NewReader(b))
+    req.Header.Set("Authorization", "Bearer "+token)
+    req.Header.Set("Content-Type", "application/json")
+    resp, err = s.httpClient.Do(req)
+    if err != nil {
+        return err
+    }
+    defer resp.Body.Close()
+    if resp.StatusCode != 201 && resp.StatusCode != 204 {
+        return fmt.Errorf("failed to create client: %s", resp.Status)
+    }
+    return nil
 }
 func (s *KeycloakServices) RefreshToken(ctx context.Context, refreshToken string) (string, string, error) {
-	urlStr := fmt.Sprintf("%s/realms/%s/protocol/openid-connect/token", s.BaseURL, s.Realm)
+    urlStr := fmt.Sprintf("%s/realms/%s/protocol/openid-connect/token", s.BaseURL, s.Realm)
 
-	form := url.Values{}
-	form.Set("grant_type", "refresh_token")
-	form.Set("client_id", s.cfg.ClientID)
-	form.Set("refresh_token", refreshToken)
+    form := url.Values{}
+    form.Set("grant_type", "refresh_token")
+    form.Set("client_id", s.cfg.ClientID)
+    form.Set("refresh_token", refreshToken)
 
-	req, err := http.NewRequestWithContext(ctx, "POST", urlStr, bytes.NewBufferString(form.Encode()))
-	if err != nil {
-		return "", "", fmt.Errorf("failed to create request: %w", err)
-	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+    req, err := http.NewRequestWithContext(ctx, "POST", urlStr, bytes.NewBufferString(form.Encode()))
+    if err != nil {
+        return "", "", fmt.Errorf("failed to create request: %w", err)
+    }
+    req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	resp, err := s.httpClient.Do(req)
-	if err != nil {
-		return "", "", fmt.Errorf("failed to send request: %w", err)
-	}
-	defer resp.Body.Close()
+    resp, err := s.httpClient.Do(req)
+    if err != nil {
+        return "", "", fmt.Errorf("failed to send request: %w", err)
+    }
+    defer resp.Body.Close()
 
-	bodyBytes, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", "", fmt.Errorf("failed to read response body: %w", err)
-	}
+    bodyBytes, err := io.ReadAll(resp.Body)
+    if err != nil {
+        return "", "", fmt.Errorf("failed to read response body: %w", err)
+    }
 
-	if resp.StatusCode != http.StatusOK {
-		log.Printf("Refresh token failed. Status: %d, Body: %s", resp.StatusCode, string(bodyBytes))
-		return "", "", fmt.Errorf("refresh failed with status: %d", resp.StatusCode)
-	}
+    if resp.StatusCode != http.StatusOK {
+        log.Printf("Refresh token failed. Status: %d, Body: %s", resp.StatusCode, string(bodyBytes))
+        return "", "", fmt.Errorf("refresh failed with status: %d", resp.StatusCode)
+    }
 
-	var result struct {
-		AccessToken  string `json:"access_token"`
-		RefreshToken string `json:"refresh_token"`
-	}
+    var result struct {
+        AccessToken  string `json:"access_token"`
+        RefreshToken string `json:"refresh_token"`
+    }
 
-	if err := json.NewDecoder(bytes.NewReader(bodyBytes)).Decode(&result); err != nil {
-		return "", "", fmt.Errorf("failed to decode response: %w", err)
-	}
+    if err := json.NewDecoder(bytes.NewReader(bodyBytes)).Decode(&result); err != nil {
+        return "", "", fmt.Errorf("failed to decode response: %w", err)
+    }
 
-	return result.AccessToken, result.RefreshToken, nil
+    return result.AccessToken, result.RefreshToken, nil
 }
